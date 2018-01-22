@@ -3,9 +3,9 @@ services:
   edge-service:
     build: ./
     ports:
-     - "8080:8080"
-     depends_on:
-       - discovery-service
+      - "8080:8080"
+    depends_on:
+      - discovery-service
   discovery-service:
     image: springcloud/eureka
     ports:
