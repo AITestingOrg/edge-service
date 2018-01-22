@@ -7,4 +7,6 @@ services:
      depends_on:
        - discovery-service
   discovery-service:
-    image: castyr/discovery-service
+    image: springcloud/eureka
+    ports:
+      - "8761:8761"
