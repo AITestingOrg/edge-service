@@ -7,6 +7,8 @@ buildscript {
 	}
 	dependencies {
 		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath("com.jayway.restassured:rest-assured:2.5.0")
+		classpath("com.jayway.restassured:spring-mock-mvc:2.5.0")
 	}
 }
 
@@ -14,6 +16,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse-wtp'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'checkstyle'
+
 checkstyle {
 	configFile = new File(rootDir, "checkstyle.xml")
 }
@@ -41,7 +44,10 @@ dependencies {
 	compile('org.springframework.cloud:spring-cloud-starter-zuul')
 	compile('org.springframework.boot:spring-boot-starter-web')
 	providedRuntime('org.springframework.boot:spring-boot-starter-tomcat')
-	testCompile('org.springframework.boot:spring-boot-starter-test')
+	testCompile ('org.springframework.cloud:spring-cloud-starter-eureka-server')
+	testCompile('com.jayway.restassured:rest-assured:2.5.0')
+	testCompile ('com.jayway.restassured:spring-mock-mvc:2.5.0')
+	testCompile ('org.springframework.cloud:spring-cloud-starter-contract-stub-runner')
 }
 
 dependencyManagement {

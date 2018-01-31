@@ -1,12 +1,42 @@
 version: '3'
+
 services:
+
   edge-service:
     build: ./
     ports:
       - "8080:8080"
     depends_on:
       - discovery-service
+
   discovery-service:
     image: springcloud/eureka
     ports:
       - "8761:8761"
+    container_name: eureka-server
+
+  mysql:
+    depends_on:
+      - discovery-service
+    image: mysql:5.7
+    container_name: mysql-docker.dev
+    volumes:
+      # Create persistent data in Host Hard Drive
+      - /Users/eriny/microservice--trip-management/mysql-data:/var/lib/mysql:rw
+    restart: always
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_USER:
+      MYSQL_PASSWORD:
+      MYSQL_ROOT_PASSWORD: ''
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+
+  microservice--trip-management:
+    build: ../microservice--trip-management/
+    depends_on:
+      - discovery-service
+      - mysql
+    container_name: microservice--trip-management.dev
+    ports:
+      - '8181:8181'
