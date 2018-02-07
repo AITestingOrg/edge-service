@@ -1,20 +1,14 @@
 package aist.edge.edgeservice;
 
-import com.google.gson.Gson;
+import com.palantir.docker.compose.DockerComposeRule;
+import com.palantir.docker.compose.connection.waiting.HealthChecks;
 import org.junit.*;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
 
@@ -23,68 +17,70 @@ import com.jayway.restassured.module.mockmvc.specification.MockMvcRequestSpecifi
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import wiremock.com.jayway.jsonpath.DocumentContext;
-import wiremock.com.jayway.jsonpath.JsonPath;
-
-@Configuration
-@EnableAutoConfiguration
-@EnableEurekaServer
-class EurekaServer {
-}
-
-class AuthenticationError {
-	public String error;
-	public String error_description;
-}
-
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = EdgeServiceApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(classes = EdgeServiceApplication.class, webEnvironment = WebEnvironment.DEFINED_PORT)
 public class EdgeServiceApplicationTests{
-
-	static ConfigurableApplicationContext eurekaServer;
-
-	@BeforeClass
-	public static void startEureka() {
-		eurekaServer = SpringApplication.run(EurekaServer.class,
-				"--server.port=8761",
-				"--eureka.instance.leaseRenewalIntervalInSeconds=1");
-	}
-
-	@AfterClass
-	public static void closeEureka() {
-		eurekaServer.close();
-	}
-
-	@LocalServerPort
-	private int port;
+	@ClassRule
+	public static DockerComposeRule docker = DockerComposeRule.
+			builder()
+				.file("src/test/resources/docker-compose.yml")
+				.waitingForService("microservice--trip-management", HealthChecks.toHaveAllPortsOpen())
+				.waitingForService("microservice--trip-management", HealthChecks.toRespondOverHttp(8181, (port) -> port.inFormat("http://localhost:8181/")))
+				.waitingForService("microservice--payment-services", HealthChecks.toHaveAllPortsOpen())
+				.waitingForService("microservice--payment-services", HealthChecks.toRespondOverHttp(8082, (port) -> port.inFormat("http://localhost:8082/")))
+				.build();
 
 	@Autowired
 	private TestRestTemplate testRestTemplate;
 
-	@Rule
-	public ExpectedException expected = ExpectedException.none();
+//	@Ignore
+//	public void testTripServiceUnauthorizedAccess() throws Exception {
+//		// given:
+//		MockMvcRequestSpecification request = given().header("Content-Type", "application/json");
+//
+//		// when:
+//		ResponseEntity<String> response = this.testRestTemplate.getForEntity("http://localhost:" + this.port + "/trips/", String.class);
+//
+//		// then:
+//		assertThat(response.getStatusCodeValue()).isEqualTo(401);
+//
+//		// and:
+//		DocumentContext parsedJson = JsonPath.parse(response.getBody());
+//		Gson gson = new Gson();
+//		AuthenticationError errorObject = gson.fromJson(response.getBody().toString(), AuthenticationError.class);
+//
+//		assertThat(errorObject.error).isEqualTo("unauthorized");
+//		assertThat(errorObject.error_description).isEqualTo("Full authentication is required to access this resource");
+//	}
 
 	@Test
-	public void contextLoads() throws Exception {
-	}
-
-	@Test
-	public void testTripServiceUnauthorizedAccess() throws Exception {
+	public void tripSwagger() throws Exception {
 		// given:
 		MockMvcRequestSpecification request = given().header("Content-Type", "application/json");
 
 		// when:
-		ResponseEntity<String> response = this.testRestTemplate.getForEntity("http://localhost:" + this.port + "/trips/", String.class);
+		ResponseEntity<String> response = this.testRestTemplate.getForEntity("http://localhost:8181/trips/", String.class);
 
 		// then:
-		assertThat(response.getStatusCodeValue()).isEqualTo(401);
+		assertThat(response.getStatusCodeValue()).isEqualTo(200);
 
 		// and:
-		DocumentContext parsedJson = JsonPath.parse(response.getBody());
-		Gson gson = new Gson();
-		AuthenticationError errorObject = gson.fromJson(response.getBody().toString(), AuthenticationError.class);
-
-		assertThat(errorObject.error).isEqualTo("unauthorized");
-		assertThat(errorObject.error_description).isEqualTo("Full authentication is required to access this resource");
+		assertThat(response.getBody()).contains("http://localhost:8181/trips/");
 	}
+
+	@Test
+	public void paymentSwagger() throws Exception {
+		// given:
+		MockMvcRequestSpecification request = given().header("Content-Type", "application/json");
+
+		// when:
+		ResponseEntity<String> response = this.testRestTemplate.getForEntity("http://localhost:8082/payments/", String.class);
+
+		// then:
+		assertThat(response.getStatusCodeValue()).isEqualTo(200);
+
+		// and:
+		assertThat(response.getBody()).contains("http://localhost:8082/payments/");
+	}
+
 }

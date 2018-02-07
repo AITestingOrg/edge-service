@@ -88,10 +88,10 @@ services:
       - '8082:8082'
 
   microservice--passenger-management:
-    build: /Users/eriny/microservice--passenger-management/
-    depends_on:
-      - discovery-service
-      - mysql
-    container_name: microservice--passenger-management.dev
-    ports:
-      - '8089:8089'
+      build: /Users/eriny/microservice--passenger-management/
+      depends_on:
+        - discovery-service
+        - mysql
+      container_name: microservice--passenger-management.dev
+      ports:
+        - '8089:8089'
