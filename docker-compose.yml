@@ -47,7 +47,7 @@ services:
       MYSQL_DATABASE: 'user_service'
 
   microservice--user-service:
-    build: /Users/eriny/microservices/microservice--user-service
+    build: ../microservice--user-service
     depends_on:
       - discovery-service
       - mysql-server
@@ -71,7 +71,7 @@ services:
       - "15672:15672"
 
   trip-management-cmd:
-    build: /Users/eriny/microservices/trip-management-cmd
+    build: ../trip-management-cmd
     container_name: trip-management-cmd
     environment:
       - RABBIT_HOST=rabbitmq
@@ -84,7 +84,7 @@ services:
       - mongo
 
   trip-management-query:
-    build: /Users/eriny/microservices/trip-management-query
+    build: ../trip-management-query
     container_name: trip-management-query
     environment:
       - RABBIT_HOST=rabbitmq
@@ -92,7 +92,6 @@ services:
     ports:
       - '8093:8093'
     depends_on:
-      - trip-management-cmd
       - rabbitmq
       - mongo
       - discovery-service
