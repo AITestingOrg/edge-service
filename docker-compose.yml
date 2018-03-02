@@ -1,13 +1,13 @@
 version: '3'
 
 services:
-#
-#  edge-service:
-#    build: ./
-#    ports:
-#      - "8080:8080"
-#    depends_on:
-#      - discovery-service
+
+  edge-service:
+    build: ./
+    ports:
+      - "8080:8080"
+    depends_on:
+      - discovery-service
 
   discovery-service:
     image: springcloud/eureka
@@ -23,12 +23,6 @@ services:
 #    ports:
 #      - 6161:6161
 
-#  redis:
-#    image: redis:3.0
-#    container_name: redis
-#    ports:
-#      - 6379:6379
-
 #  config-service:
 #    build: config-service
 #    container_name: config-service
@@ -37,61 +31,72 @@ services:
 #    ports:
 #      - 8888:8888
 
-  mysql:
-    depends_on:
-      - discovery-service
+  mysql-server:
     image: mysql:5.7
-    container_name: mysql-docker.dev
+    container_name: mysql-server
     volumes:
-      # Create persistent data in Host Hard Drive
-      - /Users/eriny/microservice--trip-management/mysql-data:/var/lib/mysql:rw
+      - mysql-data:/var/lib/mysql:rw
     restart: always
     ports:
       - '3306:3306'
     environment:
+      MYSQL_USER:
+      MYSQL_PASSWORD:
       MYSQL_ROOT_PASSWORD: 'root'
-      MYSQL_DATABASE: 'tripmanagementdb'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_DATABASE: 'user_service'
 
-  db:
+  microservice--user-service:
+    build: /Users/eriny/microservices/microservice--user-service
     depends_on:
       - discovery-service
-    image: mysql:5.7
-    container_name: paymentdb.dev
-    restart: always
+      - mysql-server
+    container_name: microservice--user-service.dev
+    ports:
+      - '8091:8091'
+
+  mongo:
+    image: 'mongo:3.4.1'
+    container_name: 'mongo'
+    ports:
+      - '27017:27017'
     volumes:
-      # Create persistent data in Host Hard Drive
-      - /Users/eriny/microservice--payment-services/mysql-data:/var/lib/mysql:rw
+      - 'mongo:/data/db'
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: 'rabbitmq'
     ports:
-      - '3307:3307'
+      - "5672:5672"
+      - "15672:15672"
+
+  trip-management-cmd:
+    build: /Users/eriny/microservices/trip-management-cmd
+    container_name: trip-management-cmd
     environment:
-      MYSQL_ROOT_PASSWORD: 'password'
-      MYSQL_DATABASE: 'payment'
-#      MYSQL_USER: 'admin'
-#      MYSQL_PASSWORD: 'password'
-
-  microservice--trip-management:
-    build: /Users/eriny/microservice--trip-management/
+      - RABBIT_HOST=rabbitmq
+      - MONGO_HOST=mongo
+    ports:
+      - '8092:8092'
     depends_on:
       - discovery-service
-      - mysql
-    container_name: microservice--trip-management.dev
-    ports:
-      - '8181:8181'
+      - rabbitmq
+      - mongo
 
-  microservice--payment-services:
-    build: /Users/eriny/microservice--payment-services/
-    depends_on:
-      - discovery-service
-      - db
-    container_name: microservice--payment-services.dev
+  trip-management-query:
+    build: /Users/eriny/microservices/trip-management-query
+    container_name: trip-management-query
+    environment:
+      - RABBIT_HOST=rabbitmq
+      - MONGO_HOST=mongo
     ports:
-      - '8082:8082'
+      - '8093:8093'
+    depends_on:
+      - trip-management-cmd
+      - rabbitmq
+      - mongo
+      - discovery-service
 
-  microservice--passenger-management:
-    build: /Users/eriny/microservice--passenger-management/
-    depends_on:
-      - discovery-service
-      - mysql
-    container_name: microservice--passenger-management.dev
-    ports:
-      - '8089:8089'
+volumes:
+  mongo:
+  mysql-data:
