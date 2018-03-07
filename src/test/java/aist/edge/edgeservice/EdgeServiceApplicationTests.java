@@ -8,22 +8,15 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.context.WebApplicationContext;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
-@WebAppConfiguration
-@ContextConfiguration
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = EdgeServiceApplication.class)
 public class EdgeServiceApplicationTests{
@@ -31,19 +24,19 @@ public class EdgeServiceApplicationTests{
 	@ClassRule
 	public static DockerComposeRule docker = DockerComposeRule.
 			builder().pullOnStartup(true)
-			.file("/Users/eriny/microservices/microservices--backing-service--edge-service/docker-compose.yml")
+			.file("/Users/eriny/microservices/microservices--backing-service--edge-service/src/test/resources/docker-compose.yml")
 			//User Service
-				.waitingForService("microservice--user-service", HealthChecks.toHaveAllPortsOpen())
-				.waitingForService("microservice--user-service", HealthChecks.toRespondOverHttp(8091,
-						(port) -> port.inFormat("http://localhost:8091/")))
+//				.waitingForService("microservice--user-service", HealthChecks.toHaveAllPortsOpen())
+//				.waitingForService("microservice--user-service", HealthChecks.toRespondOverHttp(8091,
+//						(port) -> port.inFormat("http://localhost:8091/")))
 			//Trip Command Service
-				.waitingForService("trip-management-cmd", HealthChecks.toHaveAllPortsOpen())
-				.waitingForService("trip-management-cmd", HealthChecks.toRespondOverHttp(8092,
-						(port) -> port.inFormat("http://localhost:8092/")))
+				.waitingForService("mongo", HealthChecks.toHaveAllPortsOpen())
+				.waitingForService("mongo", HealthChecks.toRespondOverHttp(27017,
+						(port) -> port.inFormat("http://localhost:27017")))
 			//Trip Query Service
-//				.waitingForService("trip-management-query", HealthChecks.toHaveAllPortsOpen())
-//				.waitingForService("trip-management-query", HealthChecks.toRespondOverHttp(8093,
-//						(port) -> port.inFormat("http://localhost:8093/")))
+				.waitingForService("rabbitmq", HealthChecks.toHaveAllPortsOpen())
+				.waitingForService("rabbitmq", HealthChecks.toRespondOverHttp(15672,
+						(port) -> port.inFormat("http://localhost:15672/")))
 			.build();
 
 	@Autowired
@@ -64,24 +57,10 @@ public class EdgeServiceApplicationTests{
 		this.mockMvc = MockMvcBuilders
 				.webAppContextSetup(this.context)
 				.build();
-		this.mockMvc.perform(post("http://localhost:8080/api/trip").contentType(MediaType.APPLICATION_JSON)
-				.content("{ \"originAddress\": \"Somewhere of the origin\", \"destinationAddress\": \"Somewhere destination\"," +
-						" \"userId\": 123e4567-e89b-12d3-a456-426655440000 }")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk());
-	}
-
-	@Test
-	public void trip_Get_Request_Test() throws Exception {
-		this.mockMvc = MockMvcBuilders
-				.webAppContextSetup(this.context)
-				.build();
-		// given:
-		MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-		parameters.add("originAddress", "This is the origin address");
-		parameters.add("destinationAddress", "This is the destination address");
-		parameters.add("userId", "123e4567-e89b-12d3-a456-426655440000");
-		this.mockMvc.perform(get("http://localhost:8093/api/trips"));
+		this.mockMvc.perform(get("http://localhost:8092/api/trip").contentType(MediaType.APPLICATION_JSON)
+						.content("{ \"originAddress\": \"Somewhere of the origin\", \"destinationAddress\": \"Somewhere destination\"," +
+						" \"userId\": 123e4567-e89b-12d3-a456-426655440000 }"))
+					.andExpect(status().isOk());
 	}
 //
 //	private String getAccessToken(String username, String password) throws Exception {
