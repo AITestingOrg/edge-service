@@ -65,7 +65,7 @@ public class EdgeServiceApplicationTests{
 		//given:
 
 		//when:
-		ResponseEntity<String> response = restTemplate.getForEntity("http://localhost:8093/api/trip", String.class);
+		ResponseEntity<String> response = restTemplate.getForEntity("http://localhost:8093/api/trips", String.class);
 
 		//then:
 		assertThat(response.getStatusCodeValue()).isEqualTo(200);
