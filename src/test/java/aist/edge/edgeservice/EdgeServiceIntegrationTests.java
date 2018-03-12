@@ -18,7 +18,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.http.*;
 import org.springframework.util.*;
 
-import java.nio.charset.Charset;
 import java.util.*;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
@@ -55,7 +54,6 @@ public class EdgeServiceIntegrationTests {
 
 	@Before
 	public void setUp() throws JSONException {
-
 		String plainCreds = "user1:password";
 		byte[] plainCredsBytes = plainCreds.getBytes();
 		byte[] base64CredsBytes = Base64.getEncoder().encode(plainCredsBytes);
@@ -64,17 +62,6 @@ public class EdgeServiceIntegrationTests {
 		HttpHeaders headers = new HttpHeaders();
 		headers.add("Authorization", "Basic ZWFnbGVleWU6dGhpc2lzc2VjcmV0");
 		headers.add("Content-Type", "application/x-www-form-urlencoded");
-//
-//s
-//		String auth = "eagleeye:thisissecret";
-//		byte[] encodedAuth = Base64.getEncoder().encode(auth.getBytes(Charset.forName("US-ASCII")));
-//		String authHeader = "Basic " + new String(encodedAuth);
-//
-//		//given:
-//		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-//		Map<String, String> map = new HashMap<>();
-//		map.put("Authorization", authHeader);
-//		headers.setAll(map);
 
 		MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
 		parameters.add("username", "eagleeye");
@@ -94,12 +81,10 @@ public class EdgeServiceIntegrationTests {
 	@Test
 	public void tripCommandPOSTRequestSuccess() {
 		//given:
-		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-		Map<String, String> map = new HashMap<>();
-		map.put("Content-Type", "application/json");
-		// TODO: Add authentication to trip command
-		map.put("Authorization", "Bearer " + token);
-		headers.setAll(map);
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Authorization", "Bearer " + token);
+		headers.add("Content-Type", "application/json");
+
 		String body = "{ \"originAddress\": \"Somewhere of the origin\", \"destinationAddress\": \"Somewhere destination\"," +
 				 "\"userId\": \"123e4567-e89b-12d3-a456-426655440000\" }";
 		HttpEntity<String> request = new HttpEntity<>(body, headers);
@@ -114,11 +99,10 @@ public class EdgeServiceIntegrationTests {
 	@Test
 	public void tripCommandPOSTRequestBadRequest() {
 		//given:
-		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-		Map<String, String> map = new HashMap<>();
-		map.put("Content-Type", "application/json");
-		map.put("Authorization", "Bearer " + token);
-		headers.setAll(map);
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Authorization", "Bearer " + token);
+		headers.add("Content-Type", "application/json");
+
 		String body = "{}";
 		HttpEntity<String> request = new HttpEntity<>(body, headers);
 
@@ -132,12 +116,8 @@ public class EdgeServiceIntegrationTests {
 	@Test
 	public void tripQueryGETRequestSuccess() {
 		//given:
-		MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-		Map<String, String> map = new HashMap<>();
-		map.put("Content-Type", "application/json");
-		// TODO: Add authentication to trip query
-		map.put("Authorization", "Bearer " + token);
-		headers.setAll(map);
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Authorization", "Bearer " + token);
 
 		//when:
 		ResponseEntity<String> response = restTemplate.getForEntity("http://localhost:8093/api/trips", String.class);
