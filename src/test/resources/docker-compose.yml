@@ -24,6 +24,30 @@ services:
 #    ports:
 #      - 8888:8888
 
+  mysql-server:
+    image: mysql:5.7
+    container_name: mysql-server
+    volumes:
+      - mysql-data:/var/lib/mysql:rw
+    restart: always
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_USER:
+      MYSQL_PASSWORD:
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_DATABASE: 'user_service'
+
+  microservice--user-service:
+    build: ../../../../microservice--user-service
+    depends_on:
+      - discovery-service
+      - mysql-server
+    container_name: microservice--user-service
+    ports:
+      - '8091:8091'
+
   mongo:
     image: 'mongo:3.4.1'
     container_name: 'mongo'
@@ -67,3 +91,4 @@ services:
 
 volumes:
   mongo:
+  mysql-data:
