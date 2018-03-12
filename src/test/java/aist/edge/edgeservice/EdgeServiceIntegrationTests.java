@@ -97,23 +97,6 @@ public class EdgeServiceIntegrationTests {
 	}
 
 	@Test
-	public void tripCommandPOSTRequestBadRequest() {
-		//given:
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Authorization", "Bearer " + token);
-		headers.add("Content-Type", "application/json");
-
-		String body = "{}";
-		HttpEntity<String> request = new HttpEntity<>(body, headers);
-
-		//when:
-		ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:8092/api/trip", request, String.class);
-
-		//then:
-		assertThat(response.getStatusCodeValue()).isEqualTo(400);
-	}
-
-	@Test
 	public void tripQueryGETRequestSuccess() {
 		//given:
 		HttpHeaders headers = new HttpHeaders();
