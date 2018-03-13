@@ -94,7 +94,7 @@ services:
     depends_on:
       - rabbitmq
       - mongo
-      - discovery-service
+      - discovery-service 
 
 volumes:
   mongo:
