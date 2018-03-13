@@ -96,16 +96,16 @@ public class EdgeServiceIntegrationTests {
 		assertThat(response.getStatusCodeValue()).isEqualTo(200);
 	}
 
-//	@Test
-//	public void tripQueryGETRequestSuccess() {
-//		//given:
-//		HttpHeaders headers = new HttpHeaders();
-//		headers.add("Authorization", "Bearer " + token);
-//
-//		//when:
-//		ResponseEntity<String> response = restTemplate.getForEntity("http://localhost:8093/api/trips", String.class);
-//
-//		//then:
-//		assertThat(response.getStatusCodeValue()).isEqualTo(200);
-//	}
+	@Test
+	public void tripQueryGETRequestSuccess() {
+		//given:
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Authorization", "Bearer " + token);
+
+		//when:
+		ResponseEntity<String> response = restTemplate.getForEntity("http://localhost:8093/api/trips", String.class);
+
+		//then:
+		assertThat(response.getStatusCodeValue()).isEqualTo(200);
+	}
 }
