@@ -15,6 +15,7 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'eclipse-wtp'
 apply plugin: 'org.springframework.boot'
+apply plugin: 'checkstyle'
 
 group = 'aist.edge'
 version = '0.0.1'
@@ -54,4 +55,9 @@ dependencyManagement {
 	imports {
 		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
 	}
+}
+
+checkstyle {
+	toolVersion = "8.7"
+	configFile = new File(rootDir, "checkstyle.xml")
 }
