@@ -47,7 +47,7 @@ public class EdgeServiceIntegrationTests {
 
     @Before
     public void setUp() throws JSONException {
-        String plainCreds = "user1:password";
+        String plainCreds = "eagleeye:thisissecret";
         byte[] plainCredsBytes = plainCreds.getBytes();
         byte[] base64CredsBytes = Base64.getEncoder().encode(plainCredsBytes);
         String base64Creds = new String(base64CredsBytes);
