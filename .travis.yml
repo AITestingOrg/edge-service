@@ -6,3 +6,6 @@ sudo: required
 
 services:
   - docker
+
+before_script:
+  - sudo service mysql stop
