@@ -6,7 +6,3 @@ sudo: required
 
 services:
   - docker
-
-after_failure:
-  - ./gradlew clean
-  - ./gradlew test --stacktrace --info --debug

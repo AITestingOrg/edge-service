@@ -61,3 +61,8 @@ checkstyle {
     toolVersion = "8.7"
     configFile = new File(rootDir, "checkstyle.xml")
 }
+
+test {
+    testLogging.showStandardStreams = true
+    testLogging.exceptionFormat = 'full'
+}
