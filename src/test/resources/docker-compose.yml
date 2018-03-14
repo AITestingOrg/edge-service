@@ -2,13 +2,6 @@ version: '3'
 
 services:
 
-  edge-service:
-    build: ./
-    ports:
-      - "8080:8080"
-    depends_on:
-      - discovery-service
-
   discovery-service:
     image: springcloud/eureka
     ports:
@@ -71,13 +64,13 @@ services:
       - "15672:15672"
 
   trip-management-cmd:
-    image: aista/trip-management-query
+    image: aista/trip-management-cmd
     container_name: trip-management-cmd
     environment:
       - RABBIT_HOST=rabbitmq
       - MONGO_HOST=mongo
     ports:
-      - '8092:8092'
+      - '8092:8080'
     depends_on:
       - discovery-service
       - rabbitmq
@@ -90,11 +83,11 @@ services:
       - RABBIT_HOST=rabbitmq
       - MONGO_HOST=mongo
     ports:
-      - '8093:8093'
+      - '8093:8080'
     depends_on:
       - rabbitmq
       - mongo
-      - discovery-service 
+      - discovery-service
 
 volumes:
   mongo:

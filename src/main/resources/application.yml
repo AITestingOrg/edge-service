@@ -14,7 +14,7 @@ zuul:
 security:
   oauth2:
     resource:
-      userInfoUri: http://192.168.99.100:8181/uaa/user
+      userInfoUri: http://localhost:8181/uaa/user
   ignored: /catalog/**
 eureka:
   instance:
@@ -23,7 +23,8 @@ eureka:
     registerWithEureka: true
     fetchRegistry: true
     serviceUrl:
-      defaultZone: http://192.168.99.100:8761/eureka/
+      defaultZone: http://localhost:8761/eureka/
+
 ---
 spring:
   profiles: docker
@@ -37,7 +38,7 @@ zuul:
 security:
   oauth2:
     resource:
-      userInfoUri: http://${DOCKER_IP:192.168.99.100}:8181/uaa/user
+      userInfoUri: http://localhost:8181/uaa/user
   ignored: /catalog/**
 eureka:
   instance:

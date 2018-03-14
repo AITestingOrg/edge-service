@@ -1,6 +1,11 @@
 language: java
-
 jdk:
   - oraclejdk8
 
-encoding: utf8
+sudo: required
+
+services:
+  - docker
+
+before_script:
+  - sudo service mysql stop
