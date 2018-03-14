@@ -4,6 +4,16 @@ jdk:
 
 sudo: required
 
+<<<<<<< HEAD
 services:
 - mongodb
 - rabbitmq
+=======
+sudo: required
+
+services:
+  - docker
+
+before_script:
+  - sudo service mysql stop
+>>>>>>> ddb2ecbf9e3b6a440f82e4fb4663fbff4f019ced
