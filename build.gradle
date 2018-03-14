@@ -15,6 +15,11 @@ buildscript {
 apply plugin: 'java'
 apply plugin: 'eclipse-wtp'
 apply plugin: 'org.springframework.boot'
+}
+	configFile = new File(rootDir, "checkstyle.xml")
+	toolVersion = "8.7"
+checkstyle {
+apply plugin: 'checkstyle'
 
 group = 'aist.edge'
 version = '0.0.1'
