@@ -9,4 +9,4 @@ services:
 
 after_failure:
   - ./gradlew clean
-  - ./gradlew test --stacktrace
+  - ./gradlew test --stacktrace --info --debug
