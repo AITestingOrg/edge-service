@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: development
+    active: docker
 ---
 spring:
   profiles: development
@@ -31,10 +31,16 @@ spring:
   application:
     name: edge-service
 zuul:
-  ignored-services: '*'
-  ignoredPatterns: /**/api/**
+  prefix: /api
   routes:
-    example-service: /example/**
+    trip-cmd:
+      path: /trip/cmd/**
+      serviceId: tripmanagementcmd
+      prefix: /api
+    trip-query:
+      path: /trip/query/**
+      serviceId: tripmanagementquery
+      prefix: /api
 security:
   oauth2:
     resource:
