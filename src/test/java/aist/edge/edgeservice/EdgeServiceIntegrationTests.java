@@ -33,7 +33,6 @@ public class EdgeServiceIntegrationTests {
     private static String tripQueryURL;
     private static String gmapsAdapterURL;
     private static String calculationServiceURL;
-//    private static String userServiceEndpoint;
 
     //Wait for all services to have ports open
     @ClassRule
@@ -46,9 +45,9 @@ public class EdgeServiceIntegrationTests {
             .waitingForService("calculationservice", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("discovery-service", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("userservice", HealthChecks.toRespondOverHttp(8091,
-                    (port) -> port.inFormat("http://localhost:8091")))
+                (port) -> port.inFormat("http://localhost:8091")))
             .waitingForService("discovery-service", HealthChecks.toRespondOverHttp(8761,
-                    (port) -> port.inFormat("http://localhost:8761")))
+                (port) -> port.inFormat("http://localhost:8761")))
             .build();
 
     //Get IP addresses and ports to run tests on
@@ -78,12 +77,6 @@ public class EdgeServiceIntegrationTests {
         calculationServiceURL = String.format("http://%s:%s", calculationService.getIp(),
                 calculationService.getExternalPort());
         LOG.info("Calculation Service endpoint found: " + calculationServiceURL);
-
-//        DockerPort userService = docker.containers().container("userservice")
-//                .port(8091);
-//        userServiceEndpoint = String.format("http://%s:%s", userService.getIp(),
-//                userService.getExternalPort());
-//        LOG.info("User Service Endpoint found: " + userServiceEndpoint);
     }
 
     private TestRestTemplate restTemplate = new TestRestTemplate();
@@ -108,7 +101,8 @@ public class EdgeServiceIntegrationTests {
         HttpEntity<String> request = new HttpEntity<>(body, headers);
 
         //when:
-        ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:8091/auth/oauth/token", request, String.class, parameters);
+        ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:8091/auth/oauth/token",
+                request, String.class, parameters);
 
         //then:
         assertThat(response.getStatusCodeValue()).isEqualTo(200);
@@ -128,7 +122,8 @@ public class EdgeServiceIntegrationTests {
         HttpEntity<String> request = new HttpEntity<>(body, headers);
 
         //when:
-        ResponseEntity<String> response = restTemplate.postForEntity(tripCommandURL + "/api/v1/trip", request, String.class);
+        ResponseEntity<String> response = restTemplate.postForEntity(tripCommandURL + "/api/v1/trip", request,
+                String.class);
 
         //then:
         assertThat(response.getStatusCodeValue()).isEqualTo(201);
