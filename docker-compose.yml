@@ -46,12 +46,12 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
       MYSQL_DATABASE: 'user_service'
 
-  microservice--user-service:
+  userservice:
     image: aista/user-service
     depends_on:
       - discovery-service
       - mysql-server
-    container_name: microservice--user-service
+    container_name: userservice
     ports:
       - '8091:8091'
 

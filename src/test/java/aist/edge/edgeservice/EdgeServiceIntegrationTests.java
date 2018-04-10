@@ -3,6 +3,7 @@ package aist.edge.edgeservice;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
 import com.palantir.docker.compose.DockerComposeRule;
+import com.palantir.docker.compose.connection.DockerPort;
 import com.palantir.docker.compose.connection.waiting.HealthChecks;
 
 import java.util.*;
@@ -10,10 +11,13 @@ import java.util.*;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
@@ -23,23 +27,64 @@ import org.springframework.util.*;
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = EdgeServiceApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class EdgeServiceIntegrationTests {
+    protected static final Logger LOG = LoggerFactory.getLogger(EdgeServiceIntegrationTests.class);
 
+    private static String tripCommandURL;
+    private static String tripQueryURL;
+    private static String gmapsAdapterURL;
+    private static String calculationServiceURL;
+//    private static String userServiceEndpoint;
+
+    //Wait for all services to have ports open
     @ClassRule
     public static DockerComposeRule docker = DockerComposeRule.builder().pullOnStartup(true)
             .file("src/test/resources/docker-compose.yml")
-            .waitingForService("microservice--user-service", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("microservice--user-service", HealthChecks.toRespondOverHttp(8091,
-                (port) -> port.inFormat("http://localhost:8091")))
-            .waitingForService("trip-management-cmd", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("trip-management-cmd", HealthChecks.toRespondOverHttp(8080,
-                (port) -> port.inFormat("http://localhost:8092")))
-            .waitingForService("trip-management-query", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("trip-management-query", HealthChecks.toRespondOverHttp(8080,
-                (port) -> port.inFormat("http://localhost:8093")))
+            .waitingForService("userservice", HealthChecks.toHaveAllPortsOpen())
+            .waitingForService("tripmanagementcmd", HealthChecks.toHaveAllPortsOpen())
+            .waitingForService("tripmanagementquery", HealthChecks.toHaveAllPortsOpen())
+            .waitingForService("gmapsadapter", HealthChecks.toHaveAllPortsOpen())
+            .waitingForService("calculationservice", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("discovery-service", HealthChecks.toHaveAllPortsOpen())
+            .waitingForService("userservice", HealthChecks.toRespondOverHttp(8091,
+                    (port) -> port.inFormat("http://localhost:8091")))
             .waitingForService("discovery-service", HealthChecks.toRespondOverHttp(8761,
-                (port) -> port.inFormat("http://localhost:8761")))
+                    (port) -> port.inFormat("http://localhost:8761")))
             .build();
+
+    //Get IP addresses and ports to run tests on
+    @BeforeClass
+    public static void initialize() {
+        LOG.info("Initializing ports from Docker");
+        DockerPort tripManagementCommand = docker.containers().container("tripmanagementcmd")
+                .port(8080);
+        tripCommandURL = String.format("http://%s:%s", tripManagementCommand.getIp(),
+                tripManagementCommand.getExternalPort());
+        LOG.info("Trip Command endpoint found: " + tripCommandURL);
+
+        DockerPort tripManagementQuery = docker.containers().container("tripmanagementquery")
+                .port(8080);
+        tripQueryURL = String.format("http://%s:%s", tripManagementQuery.getIp(),
+                tripManagementQuery.getExternalPort());
+        LOG.info("Trip Query endpoint found: " + tripQueryURL);
+
+        DockerPort gmapsAdapter = docker.containers().container("gmapsadapter")
+                .port(8080);
+        gmapsAdapterURL = String.format("http://%s:%s", gmapsAdapter.getIp(),
+                gmapsAdapter.getExternalPort());
+        LOG.info("Gmaps Adapter endpoint found: " + gmapsAdapterURL);
+
+        DockerPort calculationService = docker.containers().container("calculationservice")
+                .port(8080);
+        calculationServiceURL = String.format("http://%s:%s", calculationService.getIp(),
+                calculationService.getExternalPort());
+        LOG.info("Calculation Service endpoint found: " + calculationServiceURL);
+
+//        DockerPort userService = docker.containers().container("userservice")
+//                .port(8091);
+//        userServiceEndpoint = String.format("http://%s:%s", userService.getIp(),
+//                userService.getExternalPort());
+//        LOG.info("User Service Endpoint found: " + userServiceEndpoint);
+    }
 
     private TestRestTemplate restTemplate = new TestRestTemplate();
 
@@ -83,10 +128,10 @@ public class EdgeServiceIntegrationTests {
         HttpEntity<String> request = new HttpEntity<>(body, headers);
 
         //when:
-        ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:8092/api/trip", request, String.class);
+        ResponseEntity<String> response = restTemplate.postForEntity(tripCommandURL + "/api/v1/trip", request, String.class);
 
         //then:
-        assertThat(response.getStatusCodeValue()).isEqualTo(200);
+        assertThat(response.getStatusCodeValue()).isEqualTo(201);
     }
 
     @Test
@@ -96,7 +141,7 @@ public class EdgeServiceIntegrationTests {
         headers.add("Authorization", "Bearer " + token);
 
         //when:
-        ResponseEntity<String> response = restTemplate.getForEntity("http://localhost:8093/api/trips", String.class);
+        ResponseEntity<String> response = restTemplate.getForEntity(tripQueryURL + "/api/v1/trips", String.class);
 
         //then:
         assertThat(response.getStatusCodeValue()).isEqualTo(200);
