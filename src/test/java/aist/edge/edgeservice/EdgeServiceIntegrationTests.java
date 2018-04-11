@@ -40,6 +40,8 @@ public class EdgeServiceIntegrationTests {
     public static DockerComposeRule docker = DockerComposeRule.builder().pullOnStartup(true)
             .file("src/test/resources/docker-compose.yml")
             .waitingForService("userservice", HealthChecks.toHaveAllPortsOpen())
+            .waitingForService("mongo", HealthChecks.toHaveAllPortsOpen())
+            .waitingForService("rabbitmq", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("tripmanagementcmd", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("tripmanagementquery", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("gmapsadapter", HealthChecks.toHaveAllPortsOpen())
@@ -57,25 +59,25 @@ public class EdgeServiceIntegrationTests {
                 .port(8080);
         tripCommandURL = String.format("http://%s:%s", tripManagementCommand.getIp(),
                 tripManagementCommand.getExternalPort());
-        LOG.info("Trip Command endpoint found: " + tripCommandURL);
+        LOG.info("Trip Command url found: " + tripCommandURL);
 
         DockerPort tripManagementQuery = docker.containers().container("tripmanagementquery")
                 .port(8080);
         tripQueryURL = String.format("http://%s:%s", tripManagementQuery.getIp(),
                 tripManagementQuery.getExternalPort());
-        LOG.info("Trip Query endpoint found: " + tripQueryURL);
+        LOG.info("Trip Query url found: " + tripQueryURL);
 
         DockerPort gmapsAdapter = docker.containers().container("gmapsadapter")
                 .port(8080);
         gmapsAdapterURL = String.format("http://%s:%s", gmapsAdapter.getIp(),
                 gmapsAdapter.getExternalPort());
-        LOG.info("Gmaps Adapter endpoint found: " + gmapsAdapterURL);
+        LOG.info("Gmaps Adapter url found: " + gmapsAdapterURL);
 
         DockerPort calculationService = docker.containers().container("calculationservice")
                 .port(8080);
         calculationServiceURL = String.format("http://%s:%s", calculationService.getIp(),
                 calculationService.getExternalPort());
-        LOG.info("Calculation Service endpoint found: " + calculationServiceURL);
+        LOG.info("Calculation Service url found: " + calculationServiceURL);
 
         DockerPort userService = docker.containers().container("userservice")
                 .port(8080);
@@ -85,17 +87,16 @@ public class EdgeServiceIntegrationTests {
             (port) -> port.inFormat(userServiceURL)).succeeded()) {
             LOG.info("Waiting for user service to respond over HTTP");
         }
-        LOG.info("User Service endpoint found: " + userServiceURL);
+        LOG.info("User Service url found: " + userServiceURL);
     }
 
     private TestRestTemplate restTemplate = new TestRestTemplate();
 
     private String token;
+    private String tripId;
 
     @Before
     public void setUp() throws JSONException {
-
-
         String plainCreds = "eagleeye:thisissecret";
         byte[] plainCredsBytes = plainCreds.getBytes();
         byte[] base64CredsBytes = Base64.getEncoder().encode(plainCredsBytes);
@@ -121,6 +122,7 @@ public class EdgeServiceIntegrationTests {
         token = json.getString("access_token");
     }
 
+
     @Test
     public void tripCommandPOSTRequestSuccess() {
         //given:
@@ -128,8 +130,8 @@ public class EdgeServiceIntegrationTests {
         headers.add("Authorization", "Bearer " + token);
         headers.add("Content-Type", "application/json");
 
-        String body = "{ \"originAddress\": \"Somewhere of the origin\", \"destinationAddress\": "
-                + "\"Somewhere destination\", \"userId\": \"123e4567-e89b-12d3-a456-426655440000\" }";
+        String body = "{ \"originAddress\": \"Weston, FL\", \"destinationAddress\": "
+                + "\"Miami, FL\", \"userId\": \"123e4567-e89b-12d3-a456-426655440000\" }";
         HttpEntity<String> request = new HttpEntity<>(body, headers);
 
         //when:
@@ -141,10 +143,34 @@ public class EdgeServiceIntegrationTests {
     }
 
     @Test
-    public void tripQueryGETRequestSuccess() {
+    public void tripQueryGETSpecificTripRequestSuccess() throws JSONException {
         //given:
         HttpHeaders headers = new HttpHeaders();
         headers.add("Authorization", "Bearer " + token);
+        headers.add("Content-Type", "application/json");
+
+        String body = "{ \"originAddress\": \"Weston, FL\", \"destinationAddress\": "
+                + "\"Miami, FL\", \"userId\": \"123e4567-e89b-12d3-a456-426655440000\" }";
+        HttpEntity<String> request = new HttpEntity<>(body, headers);
+        ResponseEntity<String> postResponse = restTemplate.postForEntity(tripCommandURL + "/api/v1/trip", request, String.class);
+        assertThat(postResponse.getStatusCodeValue()).isEqualTo(201);
+
+        JSONObject json = new JSONObject(postResponse.getBody());
+        tripId = json.getString("id");
+
+        //when:
+        ResponseEntity<String> response = restTemplate.getForEntity(tripQueryURL + "/api/v1/trip/" + tripId, String.class);
+
+        //then:
+        assertThat(response.getStatusCodeValue()).isEqualTo(200);
+    }
+
+    @Test
+    public void tripQueryGETAllTripsRequestSuccess() {
+        //given:
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + token);
+        headers.add("Content-Type", "application/json");
 
         //when:
         ResponseEntity<String> response = restTemplate.getForEntity(tripQueryURL + "/api/v1/trips", String.class);
