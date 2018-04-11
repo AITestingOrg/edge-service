@@ -35,12 +35,16 @@ zuul:
   routes:
     trip-cmd:
       path: /trip/cmd/**
-      serviceId: tripmanagementcmd
-      prefix: /api
+      url: http://tripmanagementcmd:8080/api
     trip-query:
       path: /trip/query/**
-      serviceId: tripmanagementquery
-      prefix: /api
+      url: http://tripmanagementquery:8080/api
+    gmaps:
+      path: /gmaps/**
+      url: http://gmapsadapter:8080/api
+    calculation:
+      path: /calculation/service/**
+      url: http://calculationservice:8080/api
 security:
   oauth2:
     resource:
