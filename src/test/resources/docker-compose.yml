@@ -23,8 +23,9 @@ services:
 #    ports:
 #      - 8888:8888
 
-  mysql-server:
+  mysqlserver:
     image: mysql:5.7
+    container_name: mysqlserver
     volumes:
       - mysql-data:/var/lib/mysql:rw
     restart: always
@@ -39,11 +40,12 @@ services:
 
   userservice:
     image: aista/user-service
+    container_name: userservice
     depends_on:
       - discovery-service
-      - mysql-server
+      - mysqlserver
     ports:
-      - '8091:8091'
+      - '8080'
 
   mongo:
     image: 'mongo:3.4.1'

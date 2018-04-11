@@ -33,6 +33,7 @@ public class EdgeServiceIntegrationTests {
     private static String tripQueryURL;
     private static String gmapsAdapterURL;
     private static String calculationServiceURL;
+    private static String userServiceURL;
 
     //Wait for all services to have ports open
     @ClassRule
@@ -44,8 +45,6 @@ public class EdgeServiceIntegrationTests {
             .waitingForService("gmapsadapter", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("calculationservice", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("discovery-service", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("userservice", HealthChecks.toRespondOverHttp(8091,
-                (port) -> port.inFormat("http://localhost:8091")))
             .waitingForService("discovery-service", HealthChecks.toRespondOverHttp(8761,
                 (port) -> port.inFormat("http://localhost:8761")))
             .build();
@@ -77,6 +76,16 @@ public class EdgeServiceIntegrationTests {
         calculationServiceURL = String.format("http://%s:%s", calculationService.getIp(),
                 calculationService.getExternalPort());
         LOG.info("Calculation Service endpoint found: " + calculationServiceURL);
+
+        DockerPort userService = docker.containers().container("userservice")
+                .port(8080);
+        userServiceURL = String.format("http://%s:%s", userService.getIp(),
+                userService.getExternalPort());
+        while (!docker.containers().container("userservice").portIsListeningOnHttp(8080,
+            (port) -> port.inFormat(userServiceURL)).succeeded()) {
+            LOG.info("Waiting for user service to respond over HTTP");
+        }
+        LOG.info("User Service endpoint found: " + userServiceURL);
     }
 
     private TestRestTemplate restTemplate = new TestRestTemplate();
@@ -85,6 +94,8 @@ public class EdgeServiceIntegrationTests {
 
     @Before
     public void setUp() throws JSONException {
+
+
         String plainCreds = "eagleeye:thisissecret";
         byte[] plainCredsBytes = plainCreds.getBytes();
         byte[] base64CredsBytes = Base64.getEncoder().encode(plainCredsBytes);
@@ -101,7 +112,7 @@ public class EdgeServiceIntegrationTests {
         HttpEntity<String> request = new HttpEntity<>(body, headers);
 
         //when:
-        ResponseEntity<String> response = restTemplate.postForEntity("http://localhost:8091/auth/oauth/token",
+        ResponseEntity<String> response = restTemplate.postForEntity(userServiceURL + "/auth/oauth/token",
                 request, String.class, parameters);
 
         //then:
