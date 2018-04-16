@@ -6,7 +6,6 @@ services:
     image: springcloud/eureka
     ports:
       - "8761:8761"
-    container_name: eureka-server
 
 #  hystrix-dashboard:
 #    image: kbastani/hystrix-dashboard
@@ -24,9 +23,9 @@ services:
 #    ports:
 #      - 8888:8888
 
-  mysql-server:
+  mysqlserver:
     image: mysql:5.7
-    container_name: mysql-server
+    container_name: mysqlserver
     volumes:
       - mysql-data:/var/lib/mysql:rw
     restart: always
@@ -39,14 +38,14 @@ services:
       MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
       MYSQL_DATABASE: 'user_service'
 
-  microservice--user-service:
+  userservice:
     image: aista/user-service
+    container_name: userservice
     depends_on:
       - discovery-service
-      - mysql-server
-    container_name: microservice--user-service
+      - mysqlserver
     ports:
-      - '8091:8091'
+      - '8080'
 
   mongo:
     image: 'mongo:3.4.1'
@@ -63,30 +62,46 @@ services:
       - "5672:5672"
       - "15672:15672"
 
-  trip-management-cmd:
+  tripmanagementcmd:
     image: aista/trip-management-cmd
-    container_name: trip-management-cmd
     environment:
       - RABBIT_HOST=rabbitmq
       - MONGO_HOST=mongo
     ports:
-      - '8092:8080'
+      - '8080'
     depends_on:
       - discovery-service
       - rabbitmq
       - mongo
 
-  trip-management-query:
+  tripmanagementquery:
     image: aista/trip-management-query
-    container_name: trip-management-query
     environment:
       - RABBIT_HOST=rabbitmq
       - MONGO_HOST=mongo
     ports:
-      - '8093:8080'
+      - '8080'
     depends_on:
       - rabbitmq
       - mongo
+      - discovery-service
+
+  gmapsadapter:
+    image: aista/gmaps-adapter
+    environment:
+      - EUREKA_SERVER=discovery-service
+    ports:
+      - '8080'
+    depends_on:
+      - discovery-service
+
+  calculationservice:
+    image: aista/calculation-service
+    environment:
+      - EUREKA_SERVER=discovery-service
+    ports:
+      - '8080'
+    depends_on:
       - discovery-service
 
 volumes:
