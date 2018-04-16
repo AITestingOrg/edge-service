@@ -1,16 +1,20 @@
 spring:
   profiles:
-    active: docker
+    active: development
 ---
 spring:
   profiles: development
   application:
-    name: edge-service
+    name: edgeservice
 zuul:
-  ignored-services: '*'
-  ignoredPatterns: /**/api/**
+  prefix: /api
   routes:
-    example-service: /example/**
+    trip-cmd:
+      path: /trip/cmd/**
+      url: http://tripmanagementcmd:8080/api
+    trip-query:
+      path: /trip/query/**
+      url: http://tripmanagementquery:8080/api
 security:
   oauth2:
     resource:
@@ -29,7 +33,7 @@ eureka:
 spring:
   profiles: docker
   application:
-    name: edge-service
+    name: edgeservice
 zuul:
   prefix: /api
   routes:
@@ -39,12 +43,6 @@ zuul:
     trip-query:
       path: /trip/query/**
       url: http://tripmanagementquery:8080/api
-    gmaps:
-      path: /gmaps/**
-      url: http://gmapsadapter:8080/api
-    calculation:
-      path: /calculation/service/**
-      url: http://calculationservice:8080/api
 security:
   oauth2:
     resource:
