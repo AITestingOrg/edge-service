@@ -50,7 +50,7 @@ services:
       - discovery-service
       - mysqlserver
     ports:
-      - '8091:8091'
+      - '8080'
 
   mongo:
     image: 'mongo:3.4.1'
