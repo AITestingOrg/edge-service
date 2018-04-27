@@ -77,6 +77,10 @@ public class EdgeServiceIntegrationTests {
                 .port(8080);
         calculationServiceURL = String.format("http://%s:%s", calculationService.getIp(),
                 calculationService.getExternalPort());
+        while (!docker.containers().container("calculationservice").portIsListeningOnHttp(8080,
+            (port) -> port.inFormat(calculationServiceURL)).succeeded()) {
+            LOG.info("Waiting for calculation service to respond over HTTP");
+        }
         LOG.info("Calculation Service url found: " + calculationServiceURL);
 
         DockerPort userService = docker.containers().container("userservice")
@@ -152,14 +156,16 @@ public class EdgeServiceIntegrationTests {
         String body = "{ \"originAddress\": \"Weston, FL\", \"destinationAddress\": "
                 + "\"Miami, FL\", \"userId\": \"123e4567-e89b-12d3-a456-426655440000\" }";
         HttpEntity<String> request = new HttpEntity<>(body, headers);
-        ResponseEntity<String> postResponse = restTemplate.postForEntity(tripCommandURL + "/api/v1/trip", request, String.class);
+        ResponseEntity<String> postResponse = restTemplate.postForEntity(tripCommandURL + "/api/v1/trip", request,
+                String.class);
         assertThat(postResponse.getStatusCodeValue()).isEqualTo(201);
 
         JSONObject json = new JSONObject(postResponse.getBody());
         tripId = json.getString("id");
 
         //when:
-        ResponseEntity<String> response = restTemplate.getForEntity(tripQueryURL + "/api/v1/trip/" + tripId, String.class);
+        ResponseEntity<String> response = restTemplate.getForEntity(tripQueryURL + "/api/v1/trip/" + tripId,
+                String.class);
 
         //then:
         assertThat(response.getStatusCodeValue()).isEqualTo(200);
@@ -177,5 +183,24 @@ public class EdgeServiceIntegrationTests {
 
         //then:
         assertThat(response.getStatusCodeValue()).isEqualTo(200);
+    }
+
+    @Test
+    public void calculationServiceRequestSuccess() {
+        //given:
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + token);
+        headers.add("Content-Type", "application/json");
+
+        String body = "{ \"origin\": \"Weston, FL\", \"destination\": \"Miami, FL\" }";
+        HttpEntity<String> request = new HttpEntity<>(body, headers);
+
+        //when:
+        ResponseEntity<String> response = restTemplate.postForEntity(calculationServiceURL + "/api/v1/cost", request,
+                String.class);
+
+        //then:
+        assertThat(response.getStatusCodeValue()).isEqualTo(200);
+
     }
 }
