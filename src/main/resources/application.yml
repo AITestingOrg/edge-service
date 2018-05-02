@@ -5,12 +5,16 @@ spring:
 spring:
   profiles: development
   application:
-    name: edge-service
+    name: edgeservice
 zuul:
-  ignored-services: '*'
-  ignoredPatterns: /**/api/**
+  prefix: /api
   routes:
-    example-service: /example/**
+    trip-cmd:
+      path: /trip/cmd/**
+      url: http://tripmanagementcmd:8080/api
+    trip-query:
+      path: /trip/query/**
+      url: http://tripmanagementquery:8080/api
 security:
   oauth2:
     resource:
@@ -32,12 +36,16 @@ management:
 spring:
   profiles: docker
   application:
-    name: edge-service
+    name: edgeservice
 zuul:
-  ignored-services: '*'
-  ignoredPatterns: /**/api/**
+  prefix: /api
   routes:
-    example-service: /example/**
+    trip-cmd:
+      path: /trip/cmd/**
+      url: http://tripmanagementcmd:8080/api
+    trip-query:
+      path: /trip/query/**
+      url: http://tripmanagementquery:8080/api
 security:
   oauth2:
     resource:

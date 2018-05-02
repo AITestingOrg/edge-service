@@ -203,4 +203,23 @@ public class EdgeServiceIntegrationTests {
         assertThat(response.getStatusCodeValue()).isEqualTo(200);
 
     }
+
+    @Test
+    public void gmapsAdapterRequestSuccess() {
+        //given:
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + token);
+        headers.add("Content-Type", "application/json");
+
+        String body = "{ \"origin\": \"Weston, FL\", \"destination\": \"Miami, FL\", \"departureTime\": \"15220998650000000\" }";
+        HttpEntity<String> request = new HttpEntity<>(body, headers);
+
+        //when:
+        ResponseEntity<String> response = restTemplate.postForEntity(gmapsAdapterURL + "/api/v1/directions", request,
+                String.class);
+
+        //then:
+        assertThat(response.getStatusCodeValue()).isEqualTo(200);
+
+    }
 }

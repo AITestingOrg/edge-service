@@ -50,7 +50,7 @@ services:
       - discovery-service
       - mysqlserver
     ports:
-      - '8080'
+      - '8091:8091'
 
   mongo:
     image: 'mongo:3.4.1'
@@ -68,7 +68,7 @@ services:
       - "15672:15672"
 
   tripmanagementcmd:
-    image: aista/trip-management-cmd
+    image: aista/trip-management-cmd:local
     environment:
       - RABBIT_HOST=rabbitmq
       - MONGO_HOST=mongo
@@ -80,7 +80,7 @@ services:
       - mongo
 
   tripmanagementquery:
-    image: aista/trip-management-query
+    image: aista/trip-management-query:local
     environment:
       - RABBIT_HOST=rabbitmq
       - MONGO_HOST=mongo
@@ -92,7 +92,7 @@ services:
       - discovery-service
 
   gmapsadapter:
-    image: aista/gmaps-adapter
+    image: aista/gmaps-adapter:local
     environment:
       - EUREKA_SERVER=discovery-service
     ports:
@@ -101,7 +101,7 @@ services:
       - discovery-service
 
   calculationservice:
-    image: aista/calculation-service
+    image: aista/calculation-service:local
     environment:
       - EUREKA_SERVER=discovery-service
     ports:
