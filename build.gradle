@@ -69,3 +69,10 @@ checkstyle {
     toolVersion = "8.7"
     configFile = new File(rootDir, "checkstyle.xml")
 }
+
+test {
+    testLogging {
+        events "failed"
+        exceptionFormat "full"
+    }
+}
