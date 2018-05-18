@@ -211,7 +211,8 @@ public class EdgeServiceIntegrationTests {
         headers.add("Authorization", "Bearer " + token);
         headers.add("Content-Type", "application/json");
 
-        String body = "{ \"origin\": \"Weston, FL\", \"destination\": \"Miami, FL\", \"departureTime\": \"15220998650000000\" }";
+        String body = "{ \"origin\": \"Weston, FL\", \"destination\": \"Miami, FL\","
+                + " \"departureTime\": \"15220998650000000\" }";
         HttpEntity<String> request = new HttpEntity<>(body, headers);
 
         //when:
