@@ -15,10 +15,14 @@ zuul:
     trip-query:
       path: /trip/query/**
       url: http://tripmanagementquery:8080/api
+    userservice:
+      path: /userservice/**
+      url: http://userservice:8080/
+      sensitiveHeaders: Cookie,Set-Cookie
 security:
   oauth2:
     resource:
-      userInfoUri: http://localhost:8080/uaa/user
+      userInfoUri: http://userservice:8080/auth/user
   ignored: /catalog/**
 eureka:
   instance:
@@ -46,10 +50,14 @@ zuul:
     trip-query:
       path: /trip/query/**
       url: http://tripmanagementquery:8080/api
+    userservice:
+      path: /userservice/**
+      url: http://userservice:8080/
+      sensitiveHeaders: Cookie,Set-Cookie
 security:
   oauth2:
     resource:
-      userInfoUri: http://localhost:8181/uaa/user
+      userInfoUri: http://userservice:8080/auth/user
   ignored: /catalog/**
 eureka:
   instance:
