@@ -7,9 +7,9 @@ services:
     ports:
       - "80:8080"
     depends_on:
-      - discovery-service
+      - discoveryservice
 
-  discovery-service:
+  discoveryservice:
     image: aista/eureka
     ports:
       - "8761:8761"
@@ -47,7 +47,7 @@ services:
   userservice:
     image: aista/user-service
     depends_on:
-      - discovery-service
+      - discoveryservice
       - mysqlserver
     ports:
       - '8091:8091'
@@ -75,7 +75,7 @@ services:
     ports:
       - '8080'
     depends_on:
-      - discovery-service
+      - discoveryservice
       - rabbitmq
       - mongo
 
@@ -89,25 +89,25 @@ services:
     depends_on:
       - rabbitmq
       - mongo
-      - discovery-service
+      - discoveryservice
 
   gmapsadapter:
     image: aista/gmaps-adapter:local
     environment:
-      - EUREKA_SERVER=discovery-service
+      - EUREKA_SERVER=discoveryservice
     ports:
       - '8080'
     depends_on:
-      - discovery-service
+      - discoveryservice
 
   calculationservice:
     image: aista/calculation-service:local
     environment:
-      - EUREKA_SERVER=discovery-service
+      - EUREKA_SERVER=discoveryservice
     ports:
       - '8080'
     depends_on:
-      - discovery-service
+      - discoveryservice
 
 volumes:
   mongo:
