@@ -5,7 +5,7 @@ services:
   edgeservice:
     build: ./
     ports:
-      - "80:8080"
+      - "8080:8080"
     depends_on:
       - discoveryservice
 
@@ -68,7 +68,7 @@ services:
       - "15672:15672"
 
   tripmanagementcmd:
-    image: aista/trip-management-cmd:local
+    build: ../trip-management-cmd/
     environment:
       - RABBIT_HOST=rabbitmq
       - MONGO_HOST=mongo
@@ -80,7 +80,7 @@ services:
       - mongo
 
   tripmanagementquery:
-    image: aista/trip-management-query:local
+    build: ../trip-management-query/
     environment:
       - RABBIT_HOST=rabbitmq
       - MONGO_HOST=mongo
@@ -92,7 +92,7 @@ services:
       - discoveryservice
 
   gmapsadapter:
-    image: aista/gmaps-adapter:local
+    build: ../gmaps-adapter/
     environment:
       - EUREKA_SERVER=discoveryservice
     ports:
@@ -101,7 +101,7 @@ services:
       - discoveryservice
 
   calculationservice:
-    image: aista/calculation-service:local
+    build: ../calculation-service/
     environment:
       - EUREKA_SERVER=discoveryservice
     ports:
