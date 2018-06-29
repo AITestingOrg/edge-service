@@ -5,12 +5,12 @@ services:
   edgeservice:
     build: ./
     ports:
-      - "80:8080"
+      - "8080:8080"
     depends_on:
-      - discovery-service
+      - discoveryservice
 
-  discovery-service:
-    image: springcloud/eureka
+  discoveryservice:
+    image: aista/eureka
     ports:
       - "8761:8761"
 
@@ -45,9 +45,9 @@ services:
       MYSQL_DATABASE: 'user_service'
 
   userservice:
-    image: aista/user-service
+    build: ../authentication-service/
     depends_on:
-      - discovery-service
+      - discoveryservice
       - mysqlserver
     ports:
       - '8091:8091'
@@ -68,19 +68,19 @@ services:
       - "15672:15672"
 
   tripmanagementcmd:
-    image: aista/trip-management-cmd:local
+    build: ../trip-management-cmd/
     environment:
       - RABBIT_HOST=rabbitmq
       - MONGO_HOST=mongo
     ports:
       - '8080'
     depends_on:
-      - discovery-service
+      - discoveryservice
       - rabbitmq
       - mongo
 
   tripmanagementquery:
-    image: aista/trip-management-query:local
+    build: ../trip-management-query/
     environment:
       - RABBIT_HOST=rabbitmq
       - MONGO_HOST=mongo
@@ -89,25 +89,25 @@ services:
     depends_on:
       - rabbitmq
       - mongo
-      - discovery-service
+      - discoveryservice
 
   gmapsadapter:
-    image: aista/gmaps-adapter:local
+    build: ../gmaps-adapter/
     environment:
-      - EUREKA_SERVER=discovery-service
+      - EUREKA_SERVER=discoveryservice
     ports:
       - '8080'
     depends_on:
-      - discovery-service
+      - discoveryservice
 
   calculationservice:
-    image: aista/calculation-service:local
+    build: ../calculation-service/
     environment:
-      - EUREKA_SERVER=discovery-service
+      - EUREKA_SERVER=discoveryservice
     ports:
       - '8080'
     depends_on:
-      - discovery-service
+      - discoveryservice
 
 volumes:
   mongo:
