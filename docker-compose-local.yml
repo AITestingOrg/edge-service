@@ -155,7 +155,6 @@ services:
       - mongo
       - discoveryservice
 
-
 volumes:
   mongo:
   mysql-data:
