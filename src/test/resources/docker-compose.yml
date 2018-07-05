@@ -2,13 +2,6 @@ version: '3'
 
 services:
 
-  edgeservice:
-    build: ../../../
-    ports:
-      - "8080:8080"
-    depends_on:
-      - discoveryservice
-
   discoveryservice:
     image: aista/eureka
     ports:
