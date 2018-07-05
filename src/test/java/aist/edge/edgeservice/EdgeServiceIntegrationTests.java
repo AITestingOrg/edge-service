@@ -100,7 +100,7 @@ public class EdgeServiceIntegrationTests {
     private String tripId;
 
     @Before
-    public void setUp() throws JSONException{
+    public void setUp() throws JSONException {
         String plainCreds = "front-end:front-end";
         byte[] plainCredsBytes = plainCreds.getBytes();
         byte[] base64CredsBytes = Base64.getEncoder().encode(plainCredsBytes);
