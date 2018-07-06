@@ -46,8 +46,8 @@ public class EdgeServiceIntegrationTests {
             .waitingForService("tripmanagementquery", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("gmapsadapter", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("calculationservice", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("discovery-service", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("discovery-service", HealthChecks.toRespondOverHttp(8761,
+            .waitingForService("discoveryservice", HealthChecks.toHaveAllPortsOpen())
+            .waitingForService("discoveryservice", HealthChecks.toRespondOverHttp(8761,
                 (port) -> port.inFormat("http://localhost:8761")))
             .build();
 
@@ -101,7 +101,7 @@ public class EdgeServiceIntegrationTests {
 
     @Before
     public void setUp() throws JSONException {
-        String plainCreds = "eagleeye:thisissecret";
+        String plainCreds = "front-end:front-end";
         byte[] plainCredsBytes = plainCreds.getBytes();
         byte[] base64CredsBytes = Base64.getEncoder().encode(plainCredsBytes);
         String base64Creds = new String(base64CredsBytes);
@@ -111,9 +111,9 @@ public class EdgeServiceIntegrationTests {
         headers.add("Content-Type", "application/x-www-form-urlencoded");
 
         MultiValueMap<String, String> parameters = new LinkedMultiValueMap<>();
-        parameters.add("username", "eagleeye");
-        parameters.add("secret", "thisissecret");
-        String body = "grant_type=password&scope=webclient&username=user1&password=password";
+        parameters.add("username", "front-end");
+        parameters.add("secret", "front-end");
+        String body = "grant_type=password&scope=webclient&username=passenger&password=password";
         HttpEntity<String> request = new HttpEntity<>(body, headers);
 
         //when:

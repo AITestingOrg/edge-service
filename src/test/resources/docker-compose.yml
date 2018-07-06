@@ -2,30 +2,13 @@ version: '3'
 
 services:
 
-  discovery-service:
-    image: springcloud/eureka
+  discoveryservice:
+    image: aista/eureka
     ports:
       - "8761:8761"
 
-#  hystrix-dashboard:
-#    image: kbastani/hystrix-dashboard
-#    container_name: hystrix-dashboard
-#    environment:
-#      - SPRING_PROFILES_ACTIVE=docker
-#    ports:
-#      - 6161:6161
-
-#  config-service:
-#    build: config-service
-#    container_name: config-service
-#    environment:
-#      - SPRING_PROFILES_ACTIVE=docker
-#    ports:
-#      - 8888:8888
-
   mysqlserver:
     image: mysql:5.7
-    container_name: mysqlserver
     volumes:
       - mysql-data:/var/lib/mysql:rw
     restart: always
@@ -42,7 +25,7 @@ services:
     image: aista/user-service
     container_name: userservice
     depends_on:
-      - discovery-service
+      - discoveryservice
       - mysqlserver
     ports:
       - '8080'
@@ -70,7 +53,7 @@ services:
     ports:
       - '8080'
     depends_on:
-      - discovery-service
+      - discoveryservice
       - rabbitmq
       - mongo
 
@@ -84,25 +67,26 @@ services:
     depends_on:
       - rabbitmq
       - mongo
-      - discovery-service
+      - discoveryservice
 
   gmapsadapter:
     image: aista/gmaps-adapter
     environment:
-      - EUREKA_SERVER=discovery-service
+      - EUREKA_SERVER=discoveryservice
     ports:
       - '8080'
     depends_on:
-      - discovery-service
+      - discoveryservice
 
   calculationservice:
     image: aista/calculation-service
     environment:
-      - EUREKA_SERVER=discovery-service
+      - EUREKA_SERVER=discoveryservice
+    command: ["go", "run", "main.go"]
     ports:
       - '8080'
     depends_on:
-      - discovery-service
+      - discoveryservice
 
 volumes:
   mongo:

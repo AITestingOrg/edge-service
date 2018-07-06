@@ -60,6 +60,19 @@ services:
     volumes:
       - 'mongo:/data/db'
 
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: 'passenger_db'
+      POSTGRES_PASSWORD: "admin"
+      POSTGRES_USER: "admin"
+      PGDATA: ./postgres-data
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./db_volume:/var/lib/postgresql
+
   rabbitmq:
     image: rabbitmq:management
     container_name: 'rabbitmq'
@@ -104,9 +117,42 @@ services:
     image: aista/calculation-service
     environment:
       - EUREKA_SERVER=discoveryservice
+    command: ["go", "run", "main.go"]
     ports:
       - '8080'
     depends_on:
+      - discoveryservice
+
+  passenger:
+    build: ../passenger/
+    ports:
+      - '8080'
+    depends_on:
+      - postgres
+      - discoveryservice
+
+  driver-cmd:
+    image: aista/driver-cmd
+    environment:
+      - EUREKA_SERVER=discoveryservice
+    ports:
+      - '8080'
+    depends_on:
+      - rabbitmq
+      - mongo
+      - discoveryservice
+
+  driver-query:
+    image: aista/driver-query
+    container_name: 'driver-query'
+    environment:
+      - RABBIT_HOST=rabbitmq
+      - MONGO_HOST=mongo
+    ports:
+      - "8080"
+    depends_on:
+      - rabbitmq
+      - mongo
       - discoveryservice
 
 volumes:
