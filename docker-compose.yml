@@ -124,7 +124,7 @@ services:
       - discoveryservice
 
   passenger:
-    build: ../passenger/
+    image: aista/passenger
     ports:
       - '8080'
     depends_on:
