@@ -3,7 +3,7 @@ version: '3'
 services:
 
   edgeservice:
-    build: ./
+    image: aista/edge-service
     ports:
       - "8080:8080"
     depends_on:
