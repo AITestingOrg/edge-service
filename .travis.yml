@@ -6,7 +6,7 @@ env:
   - secure: WF5U05+p8xQRBhT75aviCl9sXpnzER52xJDkKaZPtsak3B/21rj5FGQ4TTu9ivh0oF56ws8Zy8hzNZhjS09QimqtpD+Zl5m5er4Q2GvrStVDM0k38wqye2IBf7juKIlkfntX1o1E9/xGkUgIW5eQpUt7TDGpon5FCvY8NHqDyVi+ZDU7hGQh8E3oyK+8Dly1ETLxVhoDEY3vG1VyEZ1IDrgAw/N6KlNIyiuWjPMBLTFAjGMzJAaf/MQiKfmB3HUBUtGqEdhobppEqriJkXl/6ov+Np+vh83dIBaOfRUpB1KgvGmefmtL7rb+mIIXOLMm9cpyqmK+6h1JeQrwB3xtWtIIXmmL2VEwmO/2YfTDyu+JpRkkgwDMLgyRKN9wEtaR+4C3X/p9zMysocDhyccOeGVq7XhJwgdosoJ0VRLVtUhPq1T10B/ipp2g8VF9TW1uIfSQJe6YYCrVK+fqtkWG5yuOfqQdGHNZkRJMpeTyzkJQzX7GZb8G0H8EZCsjdJ0FdEpshWcCB2ljozwH3fFMqnzE1thibpg7dC2BXF7aRGjmn/4vqme98i4hP+590FIMF+sdyDItVq7/91EAwh7m35dvszkFruIzLgHFRnrKAgG76bTHTz8bwywhnCZVbDmy/HEDOjj2ykW9jPKJ7buKRKVYbXnSgYqkn/keTHiRvLI=
   - secure: KlDa/wnlEEvkH4tnxTtxdWdBHJl8Kuv8tWknqxKL1rWcvo8UXNWXeBtvAB5v7eiCSJLwOqLm9Cl4OVwnZjU3oi4ymECYY296bQRFGS01DDYeExFd/VycDvV2L9FRP+71qZt2k2/DBabheI2WNLXESyAG1oJcI7IYyiDQBoA7hz72dYjQ5T8NISab8KGLCq02mvh3n+rtchgOPtbxU2wGqse+3lzui4m9/qAC+3tZJNXx7l+hzNSh1zqIhjIrzXrPs0PneCLdfTl1lZhSO2DCBo9juz2bisSdOdOWt7hssb7noOByfU9z1O2QVUfWJfUTjVwToxFaP94JeUo6rDo3gRo2WJn313f8ZtgtzQkPYrV8bTTRZ8mhb7D2Eq/2RllBRXJRdQuOv1t7mSr+hdD/mJUyHQY6yvK3YFAKkgK60aUAGMhBE2GBVFzx7qU06OBwdHJ2YBiKSC/+9sGFVhR6zIQxVPV4fdyaLLL4CEJC1vvTmHYZj1hqSZsWhuqddxQNj0RKIsfN8akW/Gi4mv2q32eCwG6XhXIKqLGVGuyHKx1N3gCjBK3Whz5QX/u8ADq7euB+mgyC/wILrzb281VARQkuu5FwUutv0x+y4S/061VZATwhY+ree728mjSxHu5qtoyI3xH6OjWDtmp+zyZOdrF2D+/ReiIRd4vkShme7sI=
 before_install:
-- docker-compose -f docker-compose-test.yml up --build -d
+- docker-compose up --build
 - echo "Testing Docker Hub credentials"
 - docker -v
 - docker login -u=$DOCKER_USERNAME -p=$DOCKER_PASSWORD
@@ -19,7 +19,7 @@ after_success:
 - if [[ "$ACTUAL_BRANCH" == "master" ]]; then echo -e "Push Container to Docker Hub";
   fi
 - docker login -u=$DOCKER_USERNAME -p=$DOCKER_PASSWORD
-- export REPO=aista/gmaps-adapter
+- export REPO=aista/edge-service
 - export TAG=`if [ "$ACTUAL_BRANCH" == "master" ]; then echo "latest";else echo "";
   fi`
 - docker build -f Dockerfile -t $REPO:$TAG .
