@@ -9,9 +9,9 @@ spring:
 zuul:
   prefix: /api
   routes:
-    calculationservice:
-      path: /calculationservice/**
-      url: http://calculationservice:8080/api
+#    calculationservice:
+#      path: /calculationservice/**
+#      url: http://calculationservice:8080/api
     trip-cmd:
       path: /trip/cmd/**
       url: http://tripmanagementcmd:8080/api
