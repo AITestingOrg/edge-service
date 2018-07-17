@@ -3,7 +3,7 @@ version: '3'
 services:
 
   edgeservice:
-    image: aista/edge-service
+    build: ./
     ports:
       - "8080:8080"
     depends_on:
@@ -21,7 +21,7 @@ services:
 #      - SPRING_PROFILES_ACTIVE=docker
 #    ports:
 #      - 6161:6161
-
+#
 #  config-service:
 #    build: config-service
 #    container_name: config-service
@@ -104,19 +104,21 @@ services:
       - mongo
       - discoveryservice
 
-  gmapsadapter:
+  gmaps-adapter:
     image: aista/gmaps-adapter
     environment:
       - EUREKA_SERVER=discoveryservice
+      - RABBIT_HOST=rabbitmq
     ports:
       - '8080'
     depends_on:
       - discoveryservice
 
-  calculationservice:
+  calculation-service:
     image: aista/calculation-service
     environment:
       - EUREKA_SERVER=discoveryservice
+      - RABBIT_HOST=rabbitmq
     command: ["go", "run", "main.go"]
     ports:
       - '8080'
