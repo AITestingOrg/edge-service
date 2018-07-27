@@ -9,6 +9,18 @@ services:
     depends_on:
       - discoveryservice
 
+  notificationservice:
+      depends_on:
+        - discoveryservice
+        - rabbitmq
+      image: aista/notification-service
+      command: notification-service
+      ports:
+        - "32700:32700"
+      environment:
+        - RABBIT_HOST=rabbitmq
+        - EUREKA_SERVER=discoveryservice
+
   discoveryservice:
     image: aista/eureka
     ports:
