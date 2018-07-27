@@ -14,6 +14,18 @@ services:
     ports:
       - "8761:8761"
 
+  notificationservice:
+    depends_on:
+      - discoveryservice
+      - rabbitmq
+    image: aista/notification-service
+    command: notification-service
+    ports:
+      - "32700:32700"
+    environment:
+      - RABBIT_HOST=rabbitmq
+      - EUREKA_SERVER=discoveryservice
+
 #  hystrix-dashboard:
 #    image: kbastani/hystrix-dashboard
 #    container_name: hystrix-dashboard
@@ -60,18 +72,18 @@ services:
     volumes:
       - 'mongo:/data/db'
 
-  postgres:
-    image: postgres
-    restart: always
-    environment:
-      POSTGRES_DB: 'passenger_db'
-      POSTGRES_PASSWORD: "admin"
-      POSTGRES_USER: "admin"
-      PGDATA: ./postgres-data
-    ports:
-      - '5432:5432'
-    volumes:
-      - ./db_volume:/var/lib/postgresql
+#  postgres:
+#    image: postgres
+#    restart: always
+#    environment:
+#      POSTGRES_DB: 'passenger_db'
+#      POSTGRES_PASSWORD: "admin"
+#      POSTGRES_USER: "admin"
+#      PGDATA: ./postgres-data
+#    ports:
+#      - '5432:5432'
+#    volumes:
+#      - ./db_volume:/var/lib/postgresql
 
   rabbitmq:
     image: rabbitmq:management
@@ -80,29 +92,29 @@ services:
       - "5672:5672"
       - "15672:15672"
 
-  tripmanagementcmd:
-    image: aista/trip-management-cmd
-    environment:
-      - RABBIT_HOST=rabbitmq
-      - MONGO_HOST=mongo
-    ports:
-      - '8080'
-    depends_on:
-      - discoveryservice
-      - rabbitmq
-      - mongo
+#  tripmanagementcmd:
+#    image: aista/trip-management-cmd
+#    environment:
+#      - RABBIT_HOST=rabbitmq
+#      - MONGO_HOST=mongo
+#    ports:
+#      - '8080'
+#    depends_on:
+#      - discoveryservice
+#      - rabbitmq
+#      - mongo
 
-  tripmanagementquery:
-    image: aista/trip-management-query
-    environment:
-      - RABBIT_HOST=rabbitmq
-      - MONGO_HOST=mongo
-    ports:
-      - '8080'
-    depends_on:
-      - rabbitmq
-      - mongo
-      - discoveryservice
+#  tripmanagementquery:
+#    image: aista/trip-management-query
+#    environment:
+#      - RABBIT_HOST=rabbitmq
+#      - MONGO_HOST=mongo
+#    ports:
+#      - '8080'
+#    depends_on:
+#      - rabbitmq
+#      - mongo
+#      - discoveryservice
 
   gmaps-adapter:
     image: aista/gmaps-adapter
@@ -125,37 +137,37 @@ services:
     depends_on:
       - discoveryservice
 
-  passenger:
-    image: aista/passenger
-    ports:
-      - '8080'
-    depends_on:
-      - postgres
-      - discoveryservice
+#  passenger:
+#    image: aista/passenger
+#    ports:
+#      - '8080'
+#    depends_on:
+#      - postgres
+#      - discoveryservice
 
-  driver-cmd:
-    image: aista/driver-cmd
-    environment:
-      - EUREKA_SERVER=discoveryservice
-    ports:
-      - '8080'
-    depends_on:
-      - rabbitmq
-      - mongo
-      - discoveryservice
-
-  driver-query:
-    image: aista/driver-query
-    container_name: 'driver-query'
-    environment:
-      - RABBIT_HOST=rabbitmq
-      - MONGO_HOST=mongo
-    ports:
-      - "8080"
-    depends_on:
-      - rabbitmq
-      - mongo
-      - discoveryservice
+#  driver-cmd:
+#    image: aista/driver-cmd
+#    environment:
+#      - EUREKA_SERVER=discoveryservice
+#    ports:
+#      - '8080'
+#    depends_on:
+#      - rabbitmq
+#      - mongo
+#      - discoveryservice
+#
+#  driver-query:
+#    image: aista/driver-query
+#    container_name: 'driver-query'
+#    environment:
+#      - RABBIT_HOST=rabbitmq
+#      - MONGO_HOST=mongo
+#    ports:
+#      - "8080"
+#    depends_on:
+#      - rabbitmq
+#      - mongo
+#      - discoveryservice
 
 volumes:
   mongo:
