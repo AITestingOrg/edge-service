@@ -1,14 +1,16 @@
-version: '3'
+version: '2.3'
 
 services:
 
   discoveryservice:
     image: aista/eureka
+    mem_limit: 512M
     ports:
       - "8761:8761"
 
   mysqlserver:
     image: mysql:5.7
+    mem_limit: 512M
     volumes:
       - mysql-data:/var/lib/mysql:rw
     restart: always
@@ -23,15 +25,19 @@ services:
 
   userservice:
     image: aista/user-service
+    mem_limit: 512M
     container_name: userservice
     depends_on:
       - discoveryservice
       - mysqlserver
     ports:
       - '8080'
+    environment:
+      - JAVA_OPTS=-Xms64m -Xmx128m -XX:+UseG1GC 
 
   mongo:
     image: 'mongo:3.4.1'
+    mem_limit: 512M
     container_name: 'mongo'
     ports:
       - '27017:27017'
@@ -40,6 +46,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:management
+    mem_limit: 512M
     container_name: 'rabbitmq'
     ports:
       - "5672:5672"
@@ -47,6 +54,7 @@ services:
 
   tripmanagementcmd:
     image: aista/trip-management-cmd
+    mem_limit: 512M
     environment:
       - RABBIT_HOST=rabbitmq
       - MONGO_HOST=mongo
@@ -56,9 +64,12 @@ services:
       - discoveryservice
       - rabbitmq
       - mongo
+    environment:
+      - JAVA_OPTS=-Xms64m -Xmx128m -XX:+UseG1GC 
 
   tripmanagementquery:
     image: aista/trip-management-query
+    mem_limit: 512M
     environment:
       - RABBIT_HOST=rabbitmq
       - MONGO_HOST=mongo
@@ -68,20 +79,28 @@ services:
       - rabbitmq
       - mongo
       - discoveryservice
+    environment:
+      - JAVA_OPTS=-Xms64m -Xmx128m -XX:+UseG1GC 
 
   gmapsadapter:
     image: aista/gmaps-adapter
+    mem_limit: 512M
     environment:
       - EUREKA_SERVER=discoveryservice
+      - RABBIT_HOST=rabbitmq
     ports:
       - '8080'
     depends_on:
       - discoveryservice
+    environment:
+      - JAVA_OPTS=-Xms64m -Xmx128m -XX:+UseG1GC 
 
   calculationservice:
     image: aista/calculation-service
+    mem_limit: 512M
     environment:
       - EUREKA_SERVER=discoveryservice
+      - RABBIT_HOST=rabbitmq
     command: ["go", "run", "main.go"]
     ports:
       - '8080'

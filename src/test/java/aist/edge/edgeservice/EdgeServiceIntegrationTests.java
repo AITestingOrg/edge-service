@@ -39,16 +39,15 @@ public class EdgeServiceIntegrationTests {
     @ClassRule
     public static DockerComposeRule docker = DockerComposeRule.builder().pullOnStartup(true)
             .file("src/test/resources/docker-compose.yml")
-            .waitingForService("userservice", HealthChecks.toHaveAllPortsOpen())
+            .waitingForService("discoveryservice", HealthChecks.toHaveAllPortsOpen())
+            .waitingForService("mysqlserver", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("mongo", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("rabbitmq", HealthChecks.toHaveAllPortsOpen())
+            .waitingForService("userservice", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("tripmanagementcmd", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("tripmanagementquery", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("gmapsadapter", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("calculationservice", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("discoveryservice", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("discoveryservice", HealthChecks.toRespondOverHttp(8761,
-                (port) -> port.inFormat("http://localhost:8761")))
             .build();
 
     //Get IP addresses and ports to run tests on
@@ -59,18 +58,30 @@ public class EdgeServiceIntegrationTests {
                 .port(8080);
         tripCommandURL = String.format("http://%s:%s", tripManagementCommand.getIp(),
                 tripManagementCommand.getExternalPort());
+        while (!docker.containers().container("tripmanagementcmd").portIsListeningOnHttp(8080,
+            (port) -> port.inFormat(tripCommandURL)).succeeded()) {
+            LOG.info("Waiting for Trip Command to respond over HTTP");
+        }
         LOG.info("Trip Command url found: " + tripCommandURL);
 
         DockerPort tripManagementQuery = docker.containers().container("tripmanagementquery")
                 .port(8080);
         tripQueryURL = String.format("http://%s:%s", tripManagementQuery.getIp(),
                 tripManagementQuery.getExternalPort());
+        while (!docker.containers().container("tripmanagementquery").portIsListeningOnHttp(8080,
+            (port) -> port.inFormat(tripQueryURL)).succeeded()) {
+            LOG.info("Waiting for Trip Query to respond over HTTP");
+        }
         LOG.info("Trip Query url found: " + tripQueryURL);
 
         DockerPort gmapsAdapter = docker.containers().container("gmapsadapter")
                 .port(8080);
         gmapsAdapterURL = String.format("http://%s:%s", gmapsAdapter.getIp(),
                 gmapsAdapter.getExternalPort());
+        while (!docker.containers().container("gmapsadapter").portIsListeningOnHttp(8080,
+            (port) -> port.inFormat(gmapsAdapterURL)).succeeded()) {
+            LOG.info("Waiting for user service to respond over HTTP");
+        }
         LOG.info("Gmaps Adapter url found: " + gmapsAdapterURL);
 
         DockerPort calculationService = docker.containers().container("calculationservice")
