@@ -1,0 +1,67 @@
+version: '3'
+
+services:
+  logspout:
+    image: bekt/logspout-logstash
+    restart: on-failure
+    environment:
+      RETRY_STARTUP: 'true'
+      RETRY_SEND: 'true'
+      LOGSTASH_TAGS: 'docker'
+      ROUTE_URIS: 'logstash://logstash:25826'
+    links:
+    - logstash
+    volumes:
+    - '/var/run/docker.sock:/tmp/docker.sock'
+    logging:
+      driver: 'json-file'
+      options:
+        max-file: '5'
+        max-size: 10m
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.3.2
+    restart: on-failure
+    ports:
+    - "9200:9200"
+    volumes:
+    - elastic:/usr/share/elasticsearch/data
+    depends_on:
+    - logstash
+    logging:
+      driver: 'json-file'
+      options:
+        max-file: '5'
+        max-size: 10m
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:6.3.2
+    restart: on-failure
+    ports:
+    - "5601:5601"
+    depends_on:
+    - elasticsearch
+    logging:
+      driver: 'json-file'
+      options:
+        max-file: '5'
+        max-size: 10m
+
+  logstash:
+    image: docker.elastic.co/logstash/logstash:6.3.2
+    restart: on-failure
+    environment:
+      LOGSPOUT: ignore
+    ports:
+    - "25826:25826"
+    volumes:
+    - ./elk-config/logstash.config:/usr/share/logstash/pipeline/logstash.config
+    command: logstash -f /usr/share/logstash/pipeline/logstash.config
+    logging:
+      driver: 'json-file'
+      options:
+        max-file: '5'
+        max-size: 10m
+
+volumes:
+  elastic:
