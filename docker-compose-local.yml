@@ -155,6 +155,18 @@ services:
       - mongo
       - discoveryservice
 
+  notificationservice:
+    depends_on:
+      - discoveryservice
+      - rabbitmq
+    image: aista/notification-service
+    command: notification-service
+    ports:
+      - "32700:32700"
+    environment:
+      - EUREKA_SERVER=discoveryservice
+      - RABBIT_HOST=rabbitmq
+
 volumes:
   mongo:
   mysql-data:

@@ -60,6 +60,18 @@ services:
     volumes:
       - 'mongo:/data/db'
 
+  notificationservice:
+    depends_on:
+      - discoveryservice
+      - rabbitmq
+    image: aista/notification-service
+    command: notification-service
+    ports:
+      - "32700:32700"
+    environment:
+      - EUREKA_SERVER=discoveryservice
+      - RABBIT_HOST=rabbitmq
+
   postgres:
     image: postgres
     restart: always
