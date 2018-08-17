@@ -54,6 +54,7 @@ services:
 
   tripmanagementcmd:
     image: aista/trip-management-cmd
+    container_name: tripmanagementcmd
     mem_limit: 512M
     environment:
       - RABBIT_HOST=rabbitmq
@@ -69,6 +70,7 @@ services:
 
   tripmanagementquery:
     image: aista/trip-management-query
+    container_name: tripmanagementquery
     mem_limit: 512M
     environment:
       - RABBIT_HOST=rabbitmq

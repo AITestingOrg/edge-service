@@ -1,6 +1,3 @@
-spring:
-  profiles:
-    active: development
 ---
 spring:
   profiles: development
@@ -36,6 +33,7 @@ management:
   security:
     enabled: false
   context-path: /actuator
+  
 ---
 spring:
   profiles: docker
@@ -67,6 +65,42 @@ eureka:
     fetchRegistry: true
     serviceUrl:
       defaultZone: http://discoveryservice:8761/eureka/
+hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 60000
+ribbon:
+  ConnectTimeout: 3000
+ReadTimeout: 60000
+
+---
+spring:
+  profiles: local
+  application:
+    name: edgeservice
+zuul:
+  prefix: /api
+  routes:
+    trip-cmd:
+      path: /trip/cmd/**
+      url: http://${DOCKER_MACHINE_IP:localhost}:8080/api
+    trip-query:
+      path: /trip/query/**
+      url: http://${DOCKER_MACHINE_IP:localhost}:8080/api
+    userservice:
+      path: /userservice/**
+      url: http://${DOCKER_MACHINE_IP:localhost}:8080/
+      sensitiveHeaders: Cookie,Set-Cookie
+security:
+  oauth2:
+    resource:
+      userInfoUri: http://${DOCKER_MACHINE_IP:localhost}:8080/auth/user
+  ignored: /catalog/**
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://${DOCKER_MACHINE_IP:localhost}:8761/eureka/
 hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 60000
 ribbon:
   ConnectTimeout: 3000
