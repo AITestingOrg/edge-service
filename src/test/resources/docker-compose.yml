@@ -101,8 +101,10 @@ services:
     image: aista/calculation-service
     mem_limit: 512M
     environment:
-      - EUREKA_SERVER=discoveryservice
       - RABBIT_HOST=rabbitmq
+      - EUREKA_SERVER=discoveryservice
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
     command: ["go", "run", "main.go"]
     ports:
       - '8080'

@@ -121,7 +121,6 @@ public class EdgeServiceIntegrationTests {
     private TestRestTemplate restTemplate = new TestRestTemplate();
 
     private String token;
-    private String tripId;
 
     @Before
     public void setUp() throws JSONException {
@@ -181,11 +180,12 @@ public class EdgeServiceIntegrationTests {
         HttpEntity<String> request = new HttpEntity<>(body, headers);
         ResponseEntity<String> postResponse = restTemplate.postForEntity(tripCommandURL + "/api/v1/trip", request,
                 String.class);
+        
         assertThat(postResponse.getStatusCodeValue()).isEqualTo(201);
 
         JSONObject json = new JSONObject(postResponse.getBody());
-        tripId = json.getString("id");
-
+        String tripId = json.getString("id");
+        
         Thread.sleep(1000);
 
         // when:
