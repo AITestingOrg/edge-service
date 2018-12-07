@@ -8,7 +8,7 @@ before_script:
   - sudo service mysql stop
   - export -f travis_wait
 script:
-  - travis_wait 30 ./gradlew check
+  - travis_wait 30 ./gradlew clean build
 env:
   global:
   - secure: WF5U05+p8xQRBhT75aviCl9sXpnzER52xJDkKaZPtsak3B/21rj5FGQ4TTu9ivh0oF56ws8Zy8hzNZhjS09QimqtpD+Zl5m5er4Q2GvrStVDM0k38wqye2IBf7juKIlkfntX1o1E9/xGkUgIW5eQpUt7TDGpon5FCvY8NHqDyVi+ZDU7hGQh8E3oyK+8Dly1ETLxVhoDEY3vG1VyEZ1IDrgAw/N6KlNIyiuWjPMBLTFAjGMzJAaf/MQiKfmB3HUBUtGqEdhobppEqriJkXl/6ov+Np+vh83dIBaOfRUpB1KgvGmefmtL7rb+mIIXOLMm9cpyqmK+6h1JeQrwB3xtWtIIXmmL2VEwmO/2YfTDyu+JpRkkgwDMLgyRKN9wEtaR+4C3X/p9zMysocDhyccOeGVq7XhJwgdosoJ0VRLVtUhPq1T10B/ipp2g8VF9TW1uIfSQJe6YYCrVK+fqtkWG5yuOfqQdGHNZkRJMpeTyzkJQzX7GZb8G0H8EZCsjdJ0FdEpshWcCB2ljozwH3fFMqnzE1thibpg7dC2BXF7aRGjmn/4vqme98i4hP+590FIMF+sdyDItVq7/91EAwh7m35dvszkFruIzLgHFRnrKAgG76bTHTz8bwywhnCZVbDmy/HEDOjj2ykW9jPKJ7buKRKVYbXnSgYqkn/keTHiRvLI=
