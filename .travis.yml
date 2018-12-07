@@ -8,7 +8,7 @@ before_script:
   - sudo service mysql stop
   - export -f travis_wait
 script:
-  - travis_wait 30 ./gradlew check -i
+  - travis_wait 5 ./gradlew check -i
 env:
   global:
   - EUREKA_SERVER="localhost"

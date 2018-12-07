@@ -56,6 +56,9 @@ public class EdgeServiceIntegrationTestsGmapsAdapter {
         while (!docker.containers().container("discoveryservice")
                 .portIsListeningOnHttp(8761, (port) -> port.inFormat(discoveryServiceURL)).succeeded()) {
             LOG.info("Waiting for discovery service to respond over HTTP");
+            LOG.info("IP: " + discoveryService.getIp());
+            LOG.info("Ext Port: " + discoveryService.getExternalPort());
+            LOG.info("Int Port: " + discoveryService.getInternalPort());
         }
         LOG.info("Discovery Service url found: " + discoveryServiceURL);
 
@@ -63,7 +66,7 @@ public class EdgeServiceIntegrationTestsGmapsAdapter {
         gmapsAdapterURL = String.format("http://%s:%s", gmapsAdapter.getIp(), gmapsAdapter.getExternalPort());
         while (!docker.containers().container("gmapsadapter")
                 .portIsListeningOnHttp(8080, (port) -> port.inFormat(gmapsAdapterURL)).succeeded()) {
-            LOG.info("Waiting for user service to respond over HTTP");
+            LOG.info("Waiting for gmapsadapter to respond over HTTP");
         }
         LOG.info("Gmaps Adapter url found: " + gmapsAdapterURL);
 

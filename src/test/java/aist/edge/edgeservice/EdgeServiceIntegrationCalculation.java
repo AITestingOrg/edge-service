@@ -75,7 +75,7 @@ public class EdgeServiceIntegrationCalculation {
         gmapsAdapterURL = String.format("http://%s:%s", gmapsAdapter.getIp(), gmapsAdapter.getExternalPort());
         while (!docker.containers().container("gmapsadapter")
                 .portIsListeningOnHttp(8080, (port) -> port.inFormat(gmapsAdapterURL)).succeeded()) {
-            LOG.info("Waiting for user service to respond over HTTP");
+            LOG.info("Waiting for gmapsadapter to respond over HTTP");
         }
         LOG.info("Gmaps Adapter url found: " + gmapsAdapterURL);
 
