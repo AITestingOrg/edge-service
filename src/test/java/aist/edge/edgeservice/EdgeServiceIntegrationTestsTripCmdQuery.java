@@ -3,11 +3,13 @@ package aist.edge.edgeservice;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
 import com.palantir.docker.compose.DockerComposeRule;
+import com.palantir.docker.compose.configuration.ShutdownStrategy;
 import com.palantir.docker.compose.connection.DockerPort;
 import com.palantir.docker.compose.connection.waiting.HealthChecks;
 
 import java.util.*;
 
+import org.joda.time.Duration;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -34,18 +36,19 @@ public class EdgeServiceIntegrationTestsTripCmdQuery {
     private static String userServiceURL;
     private static String tripCommandURL;
     private static String tripQueryURL;
+    private static Duration DEFAULT_TIMEOUT = Duration.standardMinutes(2);
 
     // Wait for all services to have ports open
     @ClassRule
     public static DockerComposeRule docker = DockerComposeRule.builder().pullOnStartup(true)
-            .file("src/test/resources/docker-compose-trip-cmd-query.yml")
-            .waitingForService("discoveryservice", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("mysqlserver", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("mongo", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("rabbitmq", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("userservice", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("tripmanagementcmd", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("tripmanagementquery", HealthChecks.toHaveAllPortsOpen())
+            .file("src/test/resources/docker-compose-trip-cmd-query.yml").shutdownStrategy(ShutdownStrategy.KILL_DOWN)
+            .waitingForService("discoveryservice", HealthChecks.toHaveAllPortsOpen(), DEFAULT_TIMEOUT)
+            .waitingForService("mysqlserver", HealthChecks.toHaveAllPortsOpen(), DEFAULT_TIMEOUT)
+            .waitingForService("mongo", HealthChecks.toHaveAllPortsOpen(), DEFAULT_TIMEOUT)
+            .waitingForService("rabbitmq", HealthChecks.toHaveAllPortsOpen(), DEFAULT_TIMEOUT)
+            .waitingForService("userservice", HealthChecks.toHaveAllPortsOpen(), DEFAULT_TIMEOUT)
+            .waitingForService("tripmanagementcmd", HealthChecks.toHaveAllPortsOpen(), DEFAULT_TIMEOUT)
+            .waitingForService("tripmanagementquery", HealthChecks.toHaveAllPortsOpen(), DEFAULT_TIMEOUT)
             .build();
 
     // Get IP addresses and ports to run tests on

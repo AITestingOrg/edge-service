@@ -3,11 +3,13 @@ package aist.edge.edgeservice;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
 import com.palantir.docker.compose.DockerComposeRule;
+import com.palantir.docker.compose.configuration.ShutdownStrategy;
 import com.palantir.docker.compose.connection.DockerPort;
 import com.palantir.docker.compose.connection.waiting.HealthChecks;
 
 import java.util.*;
 
+import org.joda.time.Duration;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.Before;
@@ -31,14 +33,15 @@ public class EdgeServiceIntegrationTestsGmapsAdapter {
 
     private static String discoveryServiceURL;
     private static String gmapsAdapterURL;
+    private static Duration DEFAULT_TIMEOUT = Duration.standardMinutes(2);
 
     // Wait for all services to have ports open
     @ClassRule
     public static DockerComposeRule docker = DockerComposeRule.builder().pullOnStartup(true)
-            .file("src/test/resources/docker-compose-gmaps-adapter.yml")
-            .waitingForService("discoveryservice", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("rabbitmq", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("gmapsadapter", HealthChecks.toHaveAllPortsOpen())
+            .file("src/test/resources/docker-compose-gmaps-adapter.yml").shutdownStrategy(ShutdownStrategy.KILL_DOWN)
+            .waitingForService("discoveryservice", HealthChecks.toHaveAllPortsOpen(), DEFAULT_TIMEOUT)
+            .waitingForService("rabbitmq", HealthChecks.toHaveAllPortsOpen(), DEFAULT_TIMEOUT)
+            .waitingForService("gmapsadapter", HealthChecks.toHaveAllPortsOpen(), DEFAULT_TIMEOUT)
             .build();
 
     // Get IP addresses and ports to run tests on
