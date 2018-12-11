@@ -85,26 +85,26 @@ public class EdgeServiceIntegrationTests {
             throw new Exception(String.format("User didn't respond, port: %s", userPort.getInternalPort()));
         }
         LOG.info("User service responded over HTTP");
-//
-//        Container tripManagementCmdContainer = docker.containers().container("tripmanagementcmd");
-//        DockerPort tripManagementCmdPort = tripManagementCmdContainer.port(8080);
-//        tripCommandURL = String.format("http://%s:%s", tripManagementCmdPort.getIp(),
-//        	tripManagementCmdPort.getExternalPort());
-//        if(!tripManagementCmdPort.isListeningNow()){
-//            LOG.info("TripManagementCmd service didn't respond over HTTP");
-//            throw new Exception(String.format("TripManagementCmd didn't respond, port: %s", tripManagementCmdPort.getInternalPort()));
-//        }
-//        LOG.info("TripManagementCmd service responded over HTTP");
-//
-//        Container tripManagementQueryContainer = docker.containers().container("tripmanagementquery");
-//        DockerPort tripManagementQueryPort = tripManagementQueryContainer.port(8080);
-//        tripQueryURL = String.format("http://%s:%s", tripManagementQueryPort.getIp(),
-//        	tripManagementQueryPort.getExternalPort());
-//        if(!tripManagementQueryPort.isListeningNow()){
-//            LOG.info("TripManagementQuery service didn't respond over HTTP");
-//            throw new Exception(String.format("TripManagementQuery didn't respond, port: %s", tripManagementQueryPort.getInternalPort()));
-//        }
-//        LOG.info("TripManagementQuery service responded over HTTP");
+
+        Container tripManagementCmdContainer = docker.containers().container("tripmanagementcmd");
+        DockerPort tripManagementCmdPort = tripManagementCmdContainer.port(8080);
+        tripCommandURL = String.format("http://%s:%s", tripManagementCmdPort.getIp(),
+        	tripManagementCmdPort.getExternalPort());
+        if(!tripManagementCmdPort.isListeningNow()){
+            LOG.info("TripManagementCmd service didn't respond over HTTP");
+            throw new Exception(String.format("TripManagementCmd didn't respond, port: %s", tripManagementCmdPort.getInternalPort()));
+        }
+        LOG.info("TripManagementCmd service responded over HTTP");
+
+        Container tripManagementQueryContainer = docker.containers().container("tripmanagementquery");
+        DockerPort tripManagementQueryPort = tripManagementQueryContainer.port(8080);
+        tripQueryURL = String.format("http://%s:%s", tripManagementQueryPort.getIp(),
+        	tripManagementQueryPort.getExternalPort());
+        if(!tripManagementQueryPort.isListeningNow()){
+            LOG.info("TripManagementQuery service didn't respond over HTTP");
+            throw new Exception(String.format("TripManagementQuery didn't respond, port: %s", tripManagementQueryPort.getInternalPort()));
+        }
+        LOG.info("TripManagementQuery service responded over HTTP");
 //
 //        Container gmapsAdapterContainer = docker.containers().container("gmapsadapter");
 //        DockerPort gmapsAdapterPort = gmapsAdapterContainer.port(8080);
@@ -151,23 +151,23 @@ public class EdgeServiceIntegrationTests {
 //        }
 //        LOG.info("User Service url found: " + userServiceURL);
 
-        DockerPort tripManagementCommand = docker.containers().container("tripmanagementcmd").port(8080);
-        tripCommandURL = String.format("http://%s:%s", tripManagementCommand.getIp(),
-                tripManagementCommand.getExternalPort());
-        while (!docker.containers().container("tripmanagementcmd")
-                .portIsListeningOnHttp(8080, (port) -> port.inFormat(tripCommandURL)).succeeded()) {
-            LOG.info("Waiting for Trip Command to respond over HTTP");
-        }
-        LOG.info("Trip Command url found: " + tripCommandURL);
-
-        DockerPort tripManagementQuery = docker.containers().container("tripmanagementquery").port(8080);
-        tripQueryURL = String.format("http://%s:%s", tripManagementQuery.getIp(),
-                tripManagementQuery.getExternalPort());
-        while (!docker.containers().container("tripmanagementquery")
-                .portIsListeningOnHttp(8080, (port) -> port.inFormat(tripQueryURL)).succeeded()) {
-            LOG.info("Waiting for Trip Query to respond over HTTP");
-        }
-        LOG.info("Trip Query url found: " + tripQueryURL);
+//        DockerPort tripManagementCommand = docker.containers().container("tripmanagementcmd").port(8080);
+//        tripCommandURL = String.format("http://%s:%s", tripManagementCommand.getIp(),
+//                tripManagementCommand.getExternalPort());
+//        while (!docker.containers().container("tripmanagementcmd")
+//                .portIsListeningOnHttp(8080, (port) -> port.inFormat(tripCommandURL)).succeeded()) {
+//            LOG.info("Waiting for Trip Command to respond over HTTP");
+//        }
+//        LOG.info("Trip Command url found: " + tripCommandURL);
+//
+//        DockerPort tripManagementQuery = docker.containers().container("tripmanagementquery").port(8080);
+//        tripQueryURL = String.format("http://%s:%s", tripManagementQuery.getIp(),
+//                tripManagementQuery.getExternalPort());
+//        while (!docker.containers().container("tripmanagementquery")
+//                .portIsListeningOnHttp(8080, (port) -> port.inFormat(tripQueryURL)).succeeded()) {
+//            LOG.info("Waiting for Trip Query to respond over HTTP");
+//        }
+//        LOG.info("Trip Query url found: " + tripQueryURL);
 
         DockerPort gmapsAdapter = docker.containers().container("gmapsadapter").port(8080);
         gmapsAdapterURL = String.format("http://%s:%s", gmapsAdapter.getIp(), gmapsAdapter.getExternalPort());
