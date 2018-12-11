@@ -77,14 +77,14 @@ public class EdgeServiceIntegrationTests {
 //        }
 //        LOG.info("Mongo service responded over HTTP");
 //
-//        Container userContainer = docker.containers().container("userservice");
-//        DockerPort userPort = userContainer.port(8080);
-//        userServiceURL = String.format("http://%s:%s", userPort.getIp(), userPort.getExternalPort());
-//        if(!userPort.isListeningNow()){
-//            LOG.info("User service didn't respond over HTTP");
-//            throw new Exception(String.format("User didn't respond, port: %s", userPort.getInternalPort()));
-//        }
-//        LOG.info("User service responded over HTTP");
+        Container userContainer = docker.containers().container("userservice");
+        DockerPort userPort = userContainer.port(8080);
+        userServiceURL = String.format("http://%s:%s", userPort.getIp(), userPort.getExternalPort());
+        if(!userPort.isListeningNow()){
+            LOG.info("User service didn't respond over HTTP");
+            throw new Exception(String.format("User didn't respond, port: %s", userPort.getInternalPort()));
+        }
+        LOG.info("User service responded over HTTP");
 //
 //        Container tripManagementCmdContainer = docker.containers().container("tripmanagementcmd");
 //        DockerPort tripManagementCmdPort = tripManagementCmdContainer.port(8080);
@@ -143,13 +143,13 @@ public class EdgeServiceIntegrationTests {
         }
         LOG.info("Mongo url found: " + mongoURL);
 
-        DockerPort userService = docker.containers().container("userservice").port(8080);
-        userServiceURL = String.format("http://%s:%s", userService.getIp(), userService.getExternalPort());
-        while (!docker.containers().container("userservice")
-                .portIsListeningOnHttp(8080, (port) -> port.inFormat(userServiceURL)).succeeded()) {
-            LOG.info("Waiting for user service to respond over HTTP");
-        }
-        LOG.info("User Service url found: " + userServiceURL);
+//        DockerPort userService = docker.containers().container("userservice").port(8080);
+//        userServiceURL = String.format("http://%s:%s", userService.getIp(), userService.getExternalPort());
+//        while (!docker.containers().container("userservice")
+//                .portIsListeningOnHttp(8080, (port) -> port.inFormat(userServiceURL)).succeeded()) {
+//            LOG.info("Waiting for user service to respond over HTTP");
+//        }
+//        LOG.info("User Service url found: " + userServiceURL);
 
         DockerPort tripManagementCommand = docker.containers().container("tripmanagementcmd").port(8080);
         tripCommandURL = String.format("http://%s:%s", tripManagementCommand.getIp(),
