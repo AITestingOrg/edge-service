@@ -4,6 +4,7 @@ import static org.assertj.core.api.Java6Assertions.assertThat;
 
 import com.palantir.docker.compose.DockerComposeRule;
 import com.palantir.docker.compose.configuration.ShutdownStrategy;
+import com.palantir.docker.compose.connection.Container;
 import com.palantir.docker.compose.connection.DockerPort;
 import com.palantir.docker.compose.connection.waiting.HealthChecks;
 
@@ -46,21 +47,19 @@ public class EdgeServiceIntegrationTestsGmapsAdapter {
 
     // Get IP addresses and ports to run tests on
     @BeforeClass
-    public static void initialize() {
+    public static void initialize() throws Exception {
 
         LOG.info("Initializing ports from Docker");
 
-        DockerPort discoveryService = docker.containers().container("discoveryservice").port(8761);
-        discoveryServiceURL = String.format("http://%s:%s", discoveryService.getIp(),
-                discoveryService.getExternalPort());
-        while (!docker.containers().container("discoveryservice")
-                .portIsListeningOnHttp(8761, (port) -> port.inFormat(discoveryServiceURL)).succeeded()) {
-            LOG.info("Waiting for discovery service to respond over HTTP");
-            LOG.info("IP: " + discoveryService.getIp());
-            LOG.info("Ext Port: " + discoveryService.getExternalPort());
-            LOG.info("Int Port: " + discoveryService.getInternalPort());
+        Container discoveryContainer = docker.containers().container("discoveryservice");
+        DockerPort discoveryPort = discoveryContainer.port(8761);
+        if(!discoveryPort.isListeningNow()){
+            LOG.info("Dscovery service didn't respond over HTTP");
+            LOG.info("IP: " + discoveryPort.getIp());
+            LOG.info("Ext Port: " + discoveryPort.getExternalPort());
+            LOG.info("Int Port: " + discoveryPort.getInternalPort());
+            throw new Exception(String.format("Discovery didn't respond, port: %s",discoveryPort.getInternalPort()));
         }
-        LOG.info("Discovery Service url found: " + discoveryServiceURL);
 
         DockerPort gmapsAdapter = docker.containers().container("gmapsadapter").port(8080);
         gmapsAdapterURL = String.format("http://%s:%s", gmapsAdapter.getIp(), gmapsAdapter.getExternalPort());
