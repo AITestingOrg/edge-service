@@ -60,8 +60,7 @@ public class EdgeServiceIntegrationTests {
         
         Container discoveryContainer = docker.containers().container("discoveryservice");
         DockerPort discoveryPort = discoveryContainer.port(8761);
-        discoveryServiceURL = String.format("http://%s:%s", discoveryContainer.getContainerName(),
-        	discoveryPort.getExternalPort());
+        discoveryServiceURL = String.format("http://%s:%s", "localhost", discoveryPort.getExternalPort());
         if(!discoveryPort.isListeningNow()){
             LOG.info("Discovery service didn't respond over HTTP");
             throw new Exception(String.format("Discovery didn't respond, port: %s", discoveryPort.getInternalPort()));
@@ -79,7 +78,7 @@ public class EdgeServiceIntegrationTests {
 //
         Container userContainer = docker.containers().container("userservice");
         DockerPort userPort = userContainer.port(8080);
-        userServiceURL = String.format("http://%s:%s", userContainer.getContainerName(), userPort.getExternalPort());
+        userServiceURL = String.format("http://%s:%s", "localhost", userPort.getExternalPort());
         if(!userPort.isListeningNow()){
             LOG.info("User service didn't respond over HTTP");
             throw new Exception(String.format("User didn't respond, port: %s", userPort.getInternalPort()));
