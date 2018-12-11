@@ -116,15 +116,15 @@ public class EdgeServiceIntegrationTests {
 //        }
 //        LOG.info("Gmaps Adapter service responded over HTTP");
 //
-//        Container calculationContainer = docker.containers().container("calculationservice");
-//        DockerPort calculationPort = calculationContainer.port(8080);
-//        calculationServiceURL = String.format("http://%s:%s", calculationPort.getIp(),
-//        	calculationPort.getExternalPort());
-//        if(!calculationPort.isListeningNow()){
-//            LOG.info("Calculation service didn't respond over HTTP");
-//            throw new Exception(String.format("Calculation didn't respond, port: %s", calculationPort.getInternalPort()));
-//        }
-//        LOG.info("Calculation service responded over HTTP");
+        Container calculationContainer = docker.containers().container("calculationservice");
+        DockerPort calculationPort = calculationContainer.port(8080);
+        calculationServiceURL = String.format("http://%s:%s", calculationPort.getIp(),
+        	calculationPort.getExternalPort());
+        if(!calculationPort.isListeningNow()){
+            LOG.info("Calculation service didn't respond over HTTP");
+            throw new Exception(String.format("Calculation didn't respond, port: %s", calculationPort.getInternalPort()));
+        }
+        LOG.info("Calculation service responded over HTTP");
 //
 //        DockerPort discoveryService = docker.containers().container("discoveryservice").port(8761);
 //        discoveryServiceURL = String.format("http://%s:%s", discoveryService.getIp(),
@@ -177,14 +177,14 @@ public class EdgeServiceIntegrationTests {
         }
         LOG.info("Gmaps Adapter url found: " + gmapsAdapterURL);
 
-        DockerPort calculationService = docker.containers().container("calculationservice").port(8080);
-        calculationServiceURL = String.format("http://%s:%s", calculationService.getIp(),
-                calculationService.getExternalPort());
-        while (!docker.containers().container("calculationservice")
-                .portIsListeningOnHttp(8080, (port) -> port.inFormat(calculationServiceURL)).succeeded()) {
-            LOG.info("Waiting for calculation service to respond over HTTP");
-        }
-        LOG.info("Calculation Service url found: " + calculationServiceURL);
+//        DockerPort calculationService = docker.containers().container("calculationservice").port(8080);
+//        calculationServiceURL = String.format("http://%s:%s", calculationService.getIp(),
+//                calculationService.getExternalPort());
+//        while (!docker.containers().container("calculationservice")
+//                .portIsListeningOnHttp(8080, (port) -> port.inFormat(calculationServiceURL)).succeeded()) {
+//            LOG.info("Waiting for calculation service to respond over HTTP");
+//        }
+//        LOG.info("Calculation Service url found: " + calculationServiceURL);
     }
 
     private TestRestTemplate restTemplate = new TestRestTemplate();
