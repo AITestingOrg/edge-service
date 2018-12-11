@@ -30,7 +30,7 @@ import org.springframework.util.*;
 public class EdgeServiceIntegrationTests {
     protected static final Logger LOG = LoggerFactory.getLogger(EdgeServiceIntegrationTests.class);
 
-    private static String discoveryServiceURL;
+    //private static String discoveryServiceURL;
     private static String mongoURL;
     private static String userServiceURL;
     private static String tripCommandURL;
@@ -60,7 +60,6 @@ public class EdgeServiceIntegrationTests {
         
         Container discoveryContainer = docker.containers().container("discoveryservice");
         DockerPort discoveryPort = discoveryContainer.port(8761);
-        discoveryServiceURL = String.format("http://%s:%s", "localhost", discoveryPort.getExternalPort());
         if(!discoveryPort.isListeningNow()){
             LOG.info("Discovery service didn't respond over HTTP");
             throw new Exception(String.format("Discovery didn't respond, port: %s", discoveryPort.getInternalPort()));

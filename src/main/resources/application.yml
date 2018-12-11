@@ -8,18 +8,18 @@ zuul:
   routes:
     trip-cmd:
       path: /trip/cmd/**
-      url: http://tripmanagementcmd:8080/api
+      url: http://${TRIP_CMD_HOST:localhost}:8080/api
     trip-query:
       path: /trip/query/**
-      url: http://tripmanagementquery:8080/api
+      url: http://${TRIP_QUERY_HOST:localhost}:8080/api
     userservice:
-      path: /userservice/**
-      url: http://userservice:8080/
+      path: /${USER_SERVICE_HOST:localhost}/**
+      url: http://${USER_SERVICE_HOST:localhost}:8080/
       sensitiveHeaders: Cookie,Set-Cookie
 security:
   oauth2:
     resource:
-      userInfoUri: http://userservice:8080/auth/user
+      userInfoUri: http://${USER_SERVICE_HOST:localhost}:8080/auth/user
   ignored: /catalog/**
 eureka:
   instance:
@@ -28,7 +28,7 @@ eureka:
     registerWithEureka: true
     fetchRegistry: true
     serviceUrl:
-      defaultZone: http://discoveryservice:8761/eureka/
+      defaultZone: http://${EUREKA_SERVER:localhost}:8761/eureka/
 management:
   security:
     enabled: false
