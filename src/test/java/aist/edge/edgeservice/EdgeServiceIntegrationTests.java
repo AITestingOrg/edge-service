@@ -50,7 +50,8 @@ public class EdgeServiceIntegrationTests {
             .waitingForService("tripmanagementcmd", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("tripmanagementquery", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("gmapsadapter", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("calculationservice", HealthChecks.toHaveAllPortsOpen()).build();
+            .waitingForService("calculationservice", HealthChecks.toHaveAllPortsOpen())
+            .build();
 
     // Get IP addresses and ports to run tests on
     @BeforeClass
@@ -77,7 +78,7 @@ public class EdgeServiceIntegrationTests {
 //
         Container userContainer = docker.containers().container("userservice");
         DockerPort userPort = userContainer.port(8080);
-        userServiceURL = String.format("http://%s:%s", "localhost", userPort.getExternalPort());
+        userServiceURL = String.format("http://%s:%s", userPort.getIp(), userPort.getExternalPort());
         if(!userPort.isListeningNow()){
             LOG.info("User service didn't respond over HTTP");
             throw new Exception(String.format("User didn't respond, port: %s", userPort.getInternalPort()));
