@@ -4,6 +4,7 @@ import static org.assertj.core.api.Java6Assertions.assertThat;
 
 import com.palantir.docker.compose.DockerComposeRule;
 import com.palantir.docker.compose.configuration.ShutdownStrategy;
+import com.palantir.docker.compose.connection.Container;
 import com.palantir.docker.compose.connection.DockerPort;
 import com.palantir.docker.compose.connection.waiting.HealthChecks;
 
@@ -53,52 +54,59 @@ public class EdgeServiceIntegrationTestsTripCmdQuery {
 
     // Get IP addresses and ports to run tests on
     @BeforeClass
-    public static void initialize() {
+    public static void initialize() throws Exception {
 
         LOG.info("Initializing ports from Docker");
 
-        DockerPort discoveryService = docker.containers().container("discoveryservice").port(8761);
-        discoveryServiceURL = String.format("http://%s:%s", discoveryService.getIp(),
-                discoveryService.getExternalPort());
-        while (!docker.containers().container("discoveryservice")
-                .portIsListeningOnHttp(8761, (port) -> port.inFormat(discoveryServiceURL)).succeeded()) {
-            LOG.info("Waiting for discovery service to respond over HTTP");
+        Container discoveryContainer = docker.containers().container("discoveryservice");
+        DockerPort discoveryPort = discoveryContainer.port(8761);
+        discoveryServiceURL = String.format("http://%s:%s", discoveryPort.getIp(),
+        	discoveryPort.getExternalPort());
+        if(!discoveryPort.isListeningNow()){
+            LOG.info("Discovery service didn't respond over HTTP");
+            throw new Exception(String.format("Discovery didn't respond, port: %s", discoveryPort.getInternalPort()));
         }
-        LOG.info("Discovery Service url found: " + discoveryServiceURL);
-
-        DockerPort mongo = docker.containers().container("mongo").port(27017);
-        mongoURL = String.format("http://%s:%s", mongo.getIp(), mongo.getExternalPort());
-        while (!docker.containers().container("mongo").portIsListeningOnHttp(27017, (port) -> port.inFormat(mongoURL))
-                .succeeded()) {
-            LOG.info("Waiting for mongo to respond over HTTP");
+        LOG.info("Discovery service responded over HTTP");
+        
+        Container mongoContainer = docker.containers().container("mongo");
+        DockerPort mongoPort = mongoContainer.port(27017);
+        mongoURL = String.format("http://%s:%s", mongoPort.getIp(), mongoPort.getExternalPort());
+        if(!mongoPort.isListeningNow()){
+            LOG.info("Mongo service didn't respond over HTTP");
+            throw new Exception(String.format("Mongo didn't respond, port: %s", mongoPort.getInternalPort()));
         }
-        LOG.info("Mongo url found: " + mongoURL);
-
-        DockerPort userService = docker.containers().container("userservice").port(8080);
-        userServiceURL = String.format("http://%s:%s", userService.getIp(), userService.getExternalPort());
-        while (!docker.containers().container("userservice")
-                .portIsListeningOnHttp(8080, (port) -> port.inFormat(userServiceURL)).succeeded()) {
-            LOG.info("Waiting for user service to respond over HTTP");
+        LOG.info("Mongo service responded over HTTP");
+        
+        Container userContainer = docker.containers().container("userservice");
+        DockerPort userPort = userContainer.port(8080);
+        userServiceURL = String.format("http://%s:%s", userPort.getIp(), userPort.getExternalPort());
+        if(!userPort.isListeningNow()){
+            LOG.info("User service didn't respond over HTTP");
+            throw new Exception(String.format("User didn't respond, port: %s", userPort.getInternalPort()));
         }
-        LOG.info("User Service url found: " + userServiceURL);
-
-        DockerPort tripManagementCommand = docker.containers().container("tripmanagementcmd").port(8080);
-        tripCommandURL = String.format("http://%s:%s", tripManagementCommand.getIp(),
-                tripManagementCommand.getExternalPort());
-        while (!docker.containers().container("tripmanagementcmd")
-                .portIsListeningOnHttp(8080, (port) -> port.inFormat(tripCommandURL)).succeeded()) {
-            LOG.info("Waiting for Trip Command to respond over HTTP");
+        LOG.info("User service responded over HTTP");
+        
+        Container tripManagementCmdContainer = docker.containers().container("tripmanagementcmd");
+        DockerPort tripManagementCmdPort = tripManagementCmdContainer.port(8080);
+        tripCommandURL = String.format("http://%s:%s", tripManagementCmdPort.getIp(),
+        	tripManagementCmdPort.getExternalPort());
+        if(!tripManagementCmdPort.isListeningNow()){
+            LOG.info("TripManagementCmd service didn't respond over HTTP");
+            throw new Exception(String.format("TripManagementCmd didn't respond, port: %s", tripManagementCmdPort.getInternalPort()));
         }
-        LOG.info("Trip Command url found: " + tripCommandURL);
-
-        DockerPort tripManagementQuery = docker.containers().container("tripmanagementquery").port(8080);
-        tripQueryURL = String.format("http://%s:%s", tripManagementQuery.getIp(),
-                tripManagementQuery.getExternalPort());
-        while (!docker.containers().container("tripmanagementquery")
-                .portIsListeningOnHttp(8080, (port) -> port.inFormat(tripQueryURL)).succeeded()) {
-            LOG.info("Waiting for Trip Query to respond over HTTP");
+        LOG.info("TripManagementCmd service responded over HTTP");
+        
+        Container tripManagementQueryContainer = docker.containers().container("tripmanagementquery");
+        DockerPort tripManagementQueryPort = tripManagementQueryContainer.port(8080);
+        tripQueryURL = String.format("http://%s:%s", tripManagementQueryPort.getIp(),
+        	tripManagementQueryPort.getExternalPort());
+        if(!tripManagementQueryPort.isListeningNow()){
+            LOG.info("TripManagementQuery service didn't respond over HTTP");
+            throw new Exception(String.format("TripManagementQuery didn't respond, port: %s", tripManagementQueryPort.getInternalPort()));
         }
-        LOG.info("Trip Query url found: " + tripQueryURL);
+        LOG.info("TripManagementQuery service responded over HTTP");
+        
+        LOG.info("Containers initialized correctly");
     }
 
     private TestRestTemplate restTemplate = new TestRestTemplate();

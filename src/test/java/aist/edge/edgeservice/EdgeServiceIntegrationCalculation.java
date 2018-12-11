@@ -4,6 +4,7 @@ import static org.assertj.core.api.Java6Assertions.assertThat;
 
 import com.palantir.docker.compose.DockerComposeRule;
 import com.palantir.docker.compose.configuration.ShutdownStrategy;
+import com.palantir.docker.compose.connection.Container;
 import com.palantir.docker.compose.connection.DockerPort;
 import com.palantir.docker.compose.connection.waiting.HealthChecks;
 
@@ -50,43 +51,50 @@ public class EdgeServiceIntegrationCalculation {
 
     // Get IP addresses and ports to run tests on
     @BeforeClass
-    public static void initialize() {
+    public static void initialize() throws Exception {
 
         LOG.info("Initializing ports from Docker");
 
-        DockerPort discoveryService = docker.containers().container("discoveryservice").port(8761);
-        discoveryServiceURL = String.format("http://%s:%s", discoveryService.getIp(),
-                discoveryService.getExternalPort());
-        while (!docker.containers().container("discoveryservice")
-                .portIsListeningOnHttp(8761, (port) -> port.inFormat(discoveryServiceURL)).succeeded()) {
-            LOG.info("Waiting for discovery service to respond over HTTP");
+        Container discoveryContainer = docker.containers().container("discoveryservice");
+        DockerPort discoveryPort = discoveryContainer.port(8761);
+        discoveryServiceURL = String.format("http://%s:%s", discoveryPort.getIp(),
+        	discoveryPort.getExternalPort());
+        if(!discoveryPort.isListeningNow()){
+            LOG.info("Discovery service didn't respond over HTTP");
+            throw new Exception(String.format("Discovery didn't respond, port: %s", discoveryPort.getInternalPort()));
         }
-        LOG.info("Discovery Service url found: " + discoveryServiceURL);
+        LOG.info("Discovery service responded over HTTP");
+        
+        Container mongoContainer = docker.containers().container("mongo");
+        DockerPort mongoPort = mongoContainer.port(27017);
+        mongoURL = String.format("http://%s:%s", mongoPort.getIp(), mongoPort.getExternalPort());
+        if(!mongoPort.isListeningNow()){
+            LOG.info("Mongo service didn't respond over HTTP");
+            throw new Exception(String.format("Mongo didn't respond, port: %s", mongoPort.getInternalPort()));
+        }
+        LOG.info("Mongo service responded over HTTP");
 
-        DockerPort mongo = docker.containers().container("mongo").port(27017);
-        mongoURL = String.format("http://%s:%s", mongo.getIp(), mongo.getExternalPort());
-        while (!docker.containers().container("mongo").portIsListeningOnHttp(27017, (port) -> port.inFormat(mongoURL))
-                .succeeded()) {
-            LOG.info("Waiting for mongo to respond over HTTP");
+        Container gmapsAdapterContainer = docker.containers().container("gmapsadapter");
+        DockerPort gmapsAdapterPort = gmapsAdapterContainer.port(8080);
+        gmapsAdapterURL = String.format("http://%s:%s", gmapsAdapterPort.getIp(),
+        	gmapsAdapterPort.getExternalPort());
+        if(!gmapsAdapterPort.isListeningNow()){
+            LOG.info("Gmaps Adapter service didn't respond over HTTP");
+            throw new Exception(String.format("Gmaps Adapter didn't respond, port: %s", gmapsAdapterPort.getInternalPort()));
         }
-        LOG.info("Mongo url found: " + mongoURL);
+        LOG.info("Gmaps Adapter service responded over HTTP");
 
-        DockerPort gmapsAdapter = docker.containers().container("gmapsadapter").port(8080);
-        gmapsAdapterURL = String.format("http://%s:%s", gmapsAdapter.getIp(), gmapsAdapter.getExternalPort());
-        while (!docker.containers().container("gmapsadapter")
-                .portIsListeningOnHttp(8080, (port) -> port.inFormat(gmapsAdapterURL)).succeeded()) {
-            LOG.info("Waiting for gmapsadapter to respond over HTTP");
+        Container calculationContainer = docker.containers().container("calculationservice");
+        DockerPort calculationPort = calculationContainer.port(8080);
+        calculationServiceURL = String.format("http://%s:%s", calculationPort.getIp(),
+        	calculationPort.getExternalPort());
+        if(!calculationPort.isListeningNow()){
+            LOG.info("Calculation service didn't respond over HTTP");
+            throw new Exception(String.format("Calculation didn't respond, port: %s", calculationPort.getInternalPort()));
         }
-        LOG.info("Gmaps Adapter url found: " + gmapsAdapterURL);
-
-        DockerPort calculationService = docker.containers().container("calculationservice").port(8080);
-        calculationServiceURL = String.format("http://%s:%s", calculationService.getIp(),
-                calculationService.getExternalPort());
-        while (!docker.containers().container("calculationservice")
-                .portIsListeningOnHttp(8080, (port) -> port.inFormat(calculationServiceURL)).succeeded()) {
-            LOG.info("Waiting for calculation service to respond over HTTP");
-        }
-        LOG.info("Calculation Service url found: " + calculationServiceURL);
+        LOG.info("Calculation service responded over HTTP");
+        
+        LOG.info("Containers initialized correctly");
     }
 
     private TestRestTemplate restTemplate = new TestRestTemplate();
