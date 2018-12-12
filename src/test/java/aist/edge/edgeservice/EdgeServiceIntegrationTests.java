@@ -222,8 +222,6 @@ public class EdgeServiceIntegrationTests {
         // when:
         ResponseEntity<String> response;
         
-        Runtime rt = Runtime.getRuntime();
-        
         //////////////////////////////////////////////
         
         Runtime rt = Runtime.getRuntime();
