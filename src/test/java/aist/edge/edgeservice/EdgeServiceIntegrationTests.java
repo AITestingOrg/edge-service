@@ -3,6 +3,7 @@ package aist.edge.edgeservice;
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Base64;
 
@@ -203,7 +204,7 @@ public class EdgeServiceIntegrationTests {
     private String token;
 
     @Before
-    public void setUp() throws JSONException {
+    public void setUp() throws JSONException, IOException {
         String plainCreds = "front-end:front-end";
         byte[] plainCredsBytes = plainCreds.getBytes();
         byte[] base64CredsBytes = Base64.getEncoder().encode(plainCredsBytes);
