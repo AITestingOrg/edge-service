@@ -249,7 +249,7 @@ public class EdgeServiceIntegrationTests {
 	//////////////////////////////////////////////
 
 	Runtime rt = Runtime.getRuntime();
-	String[] commands = { "docker", "inspect $(docker ps)" };
+	String[] commands = { "docker", "inspect", "(docker ps)" };
 	Process proc = rt.exec(commands);
 
 	BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
