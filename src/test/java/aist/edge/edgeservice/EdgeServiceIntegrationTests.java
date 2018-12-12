@@ -2,12 +2,9 @@ package aist.edge.edgeservice;
 
 import static org.assertj.core.api.Java6Assertions.assertThat;
 
-import com.palantir.docker.compose.DockerComposeRule;
-import com.palantir.docker.compose.connection.Container;
-import com.palantir.docker.compose.connection.DockerPort;
-import com.palantir.docker.compose.connection.waiting.HealthChecks;
-
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.Base64;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -16,14 +13,21 @@ import org.junit.BeforeClass;
 import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.util.*;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+
+import com.palantir.docker.compose.DockerComposeRule;
+import com.palantir.docker.compose.connection.Container;
+import com.palantir.docker.compose.connection.DockerPort;
+import com.palantir.docker.compose.connection.waiting.HealthChecks;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @SpringBootTest(classes = EdgeServiceApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -33,6 +37,9 @@ public class EdgeServiceIntegrationTests {
     //private static String discoveryServiceURL;
     private static String mongoURL;
     private static String userServiceURL;
+    private static String userServiceURL1;
+    private static String userServiceURL2;
+    private static String userServiceURL3;
     private static String tripCommandURL;
     private static String tripQueryURL;
     private static String gmapsAdapterURL;
@@ -78,12 +85,17 @@ public class EdgeServiceIntegrationTests {
 //
         Container userContainer = docker.containers().container("userservice");
         DockerPort userPort = userContainer.port(8080);
-        userServiceURL = String.format("http://%s:%s", userPort.getIp(), userPort.getExternalPort());
+        userServiceURL = String.format("http://%s:%s", userContainer.getContainerName(), userPort.getInternalPort());
+        userServiceURL1 = String.format("http://%s:%s", userContainer.getContainerName(), userPort.getExternalPort());
+        userServiceURL2 = String.format("http://%s:%s", userPort.getIp(), userPort.getInternalPort());
+        userServiceURL3 = String.format("http://%s:%s", userPort.getIp(), userPort.getExternalPort());
         if(!userPort.isListeningNow()){
             LOG.info("User service didn't respond over HTTP");
             throw new Exception(String.format("User didn't respond, port: %s", userPort.getInternalPort()));
         }
         LOG.info("User service responded over HTTP");
+        LOG.info(String.format("User Service docker-name: %s - IP: %s - Int Port: %s - Ext Port: %s"
+        	, userContainer.getContainerName(), userPort.getIp(), userPort.getInternalPort(), userPort.getExternalPort()));
 
         Container tripManagementCmdContainer = docker.containers().container("tripmanagementcmd");
         DockerPort tripManagementCmdPort = tripManagementCmdContainer.port(8080);
@@ -208,7 +220,41 @@ public class EdgeServiceIntegrationTests {
         HttpEntity<String> request = new HttpEntity<>(body, headers);
 
         // when:
-        ResponseEntity<String> response = restTemplate.postForEntity(userServiceURL + "/auth/oauth/token", request,
+        ResponseEntity<String> response;
+        
+        Runtime rt = Runtime.getRuntime();
+        
+        //////////////////////////////////////////////
+        
+        Runtime rt = Runtime.getRuntime();
+        String[] commands = {"docker","ps"};
+        Process proc = rt.exec(commands);
+
+        BufferedReader stdInput = new BufferedReader(new 
+             InputStreamReader(proc.getInputStream()));
+
+        BufferedReader stdError = new BufferedReader(new 
+             InputStreamReader(proc.getErrorStream()));
+
+        // read the output from the command
+        System.out.println("Here is the standard output of the command:\n");
+        String s = null;
+        while ((s = stdInput.readLine()) != null) {
+            System.out.println(s);
+            LOG.info(s);
+        }
+
+        // read any errors from the attempted command
+        System.out.println("Here is the standard error of the command (if any):\n");
+        while ((s = stdError.readLine()) != null) {
+            System.out.println(s);
+            LOG.info(s);
+        }
+        
+        //////////////////////////////////////////////
+
+        LOG.info(String.format("User Service - Trying url: %s", userServiceURL3));
+        response = restTemplate.postForEntity(userServiceURL3 + "/auth/oauth/token", request,
                 String.class, parameters);
 
         // then:
