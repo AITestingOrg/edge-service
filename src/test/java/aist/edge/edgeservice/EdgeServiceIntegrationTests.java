@@ -5,7 +5,9 @@ import static org.assertj.core.api.Java6Assertions.assertThat;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -248,8 +250,10 @@ public class EdgeServiceIntegrationTests {
 
 	//////////////////////////////////////////////
 
+	List<String> containerList = new ArrayList<String>();
 	Runtime rt = Runtime.getRuntime();
-	String[] commands = { "docker", "inspect", "(docker ps -q)" };
+
+	String[] commands = { "docker", "ps", "-q" };
 	Process proc = rt.exec(commands);
 
 	BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -260,6 +264,7 @@ public class EdgeServiceIntegrationTests {
 	System.out.println("Here is the standard output of the command:\n");
 	String s = null;
 	while ((s = stdInput.readLine()) != null) {
+	    containerList.add(s);
 	    System.out.println(s);
 	    LOG.info(s);
 	}
@@ -271,6 +276,30 @@ public class EdgeServiceIntegrationTests {
 	    LOG.info(s);
 	}
 
+	for (String containerId : containerList) {
+
+	    String[] commands1 = { "docker", "inspect", containerId };
+	    Process proc1 = rt.exec(commands1);
+
+	    BufferedReader stdInput1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
+
+	    BufferedReader stdError1 = new BufferedReader(new InputStreamReader(proc1.getErrorStream()));
+
+	    // read the output from the command
+	    System.out.println("Here is the standard output of the command:\n");
+	    String s1 = null;
+	    while ((s1 = stdInput1.readLine()) != null) {
+		System.out.println(s1);
+		LOG.info(s1);
+	    }
+
+	    // read any errors from the attempted command
+	    System.out.println("Here is the standard error of the command (if any):\n");
+	    while ((s1 = stdError1.readLine()) != null) {
+		System.out.println(s1);
+		LOG.info(s1);
+	    }
+	}
 	//////////////////////////////////////////////
 
 	LOG.info(String.format("User Service - Trying url: %s", userServiceURL3));
