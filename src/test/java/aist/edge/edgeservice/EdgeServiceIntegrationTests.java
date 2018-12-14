@@ -92,7 +92,7 @@ public class EdgeServiceIntegrationTests {
 	userServiceURL = String.format("http://%s:%s", userContainer.getContainerName(), userPort.getInternalPort());
 	userServiceURL1 = String.format("http://%s:%s", userContainer.getContainerName(), userPort.getExternalPort());
 	userServiceURL2 = String.format("http://%s:%s", userPort.getIp(), userPort.getInternalPort());
-	userServiceURL3 = String.format("http://%s:%s", userPort.getIp(), userPort.getExternalPort());
+	userServiceURL3 = String.format("http://0.0.0.0:%s", userPort.getExternalPort());
 	if (!userPort.isListeningNow()) {
 	    LOG.info("User service didn't respond over HTTP");
 	    throw new Exception(String.format("User didn't respond, port: %s", userPort.getInternalPort()));
@@ -250,56 +250,56 @@ public class EdgeServiceIntegrationTests {
 
 	//////////////////////////////////////////////
 
-	List<String> containerList = new ArrayList<String>();
-	Runtime rt = Runtime.getRuntime();
-
-	String[] commands = { "docker", "ps", "-q" };
-	Process proc = rt.exec(commands);
-
-	BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-
-	BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-
-	// read the output from the command
-	System.out.println("Here is the standard output of the command:\n");
-	String s = null;
-	while ((s = stdInput.readLine()) != null) {
-	    containerList.add(s);
-	    System.out.println(s);
-	    LOG.info(s);
-	}
-
-	// read any errors from the attempted command
-	System.out.println("Here is the standard error of the command (if any):\n");
-	while ((s = stdError.readLine()) != null) {
-	    System.out.println(s);
-	    LOG.info(s);
-	}
-
-	for (String containerId : containerList) {
-
-	    String[] commands1 = { "docker", "inspect", containerId };
-	    Process proc1 = rt.exec(commands1);
-
-	    BufferedReader stdInput1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
-
-	    BufferedReader stdError1 = new BufferedReader(new InputStreamReader(proc1.getErrorStream()));
-
-	    // read the output from the command
-	    System.out.println("Here is the standard output of the command:\n");
-	    String s1 = null;
-	    while ((s1 = stdInput1.readLine()) != null) {
-		System.out.println(s1);
-		LOG.info(s1);
-	    }
-
-	    // read any errors from the attempted command
-	    System.out.println("Here is the standard error of the command (if any):\n");
-	    while ((s1 = stdError1.readLine()) != null) {
-		System.out.println(s1);
-		LOG.info(s1);
-	    }
-	}
+//	List<String> containerList = new ArrayList<String>();
+//	Runtime rt = Runtime.getRuntime();
+//
+//	String[] commands = { "docker", "ps", "-q" };
+//	Process proc = rt.exec(commands);
+//
+//	BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+//
+//	BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+//
+//	// read the output from the command
+//	System.out.println("Here is the standard output of the command:\n");
+//	String s = null;
+//	while ((s = stdInput.readLine()) != null) {
+//	    containerList.add(s);
+//	    System.out.println(s);
+//	    LOG.info(s);
+//	}
+//
+//	// read any errors from the attempted command
+//	System.out.println("Here is the standard error of the command (if any):\n");
+//	while ((s = stdError.readLine()) != null) {
+//	    System.out.println(s);
+//	    LOG.info(s);
+//	}
+//
+//	for (String containerId : containerList) {
+//
+//	    String[] commands1 = { "docker", "inspect", containerId };
+//	    Process proc1 = rt.exec(commands1);
+//
+//	    BufferedReader stdInput1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
+//
+//	    BufferedReader stdError1 = new BufferedReader(new InputStreamReader(proc1.getErrorStream()));
+//
+//	    // read the output from the command
+//	    System.out.println("Here is the standard output of the command:\n");
+//	    String s1 = null;
+//	    while ((s1 = stdInput1.readLine()) != null) {
+//		System.out.println(s1);
+//		LOG.info(s1);
+//	    }
+//
+//	    // read any errors from the attempted command
+//	    System.out.println("Here is the standard error of the command (if any):\n");
+//	    while ((s1 = stdError1.readLine()) != null) {
+//		System.out.println(s1);
+//		LOG.info(s1);
+//	    }
+//	}
 	//////////////////////////////////////////////
 
 	LOG.info(String.format("User Service - Trying url: %s", userServiceURL3));
