@@ -250,31 +250,55 @@ public class EdgeServiceIntegrationTests {
 
 	//////////////////////////////////////////////
 
-//	List<String> containerList = new ArrayList<String>();
-//	Runtime rt = Runtime.getRuntime();
-//
-//	String[] commands = { "docker", "ps", "-q" };
-//	Process proc = rt.exec(commands);
-//
-//	BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-//
-//	BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
-//
-//	// read the output from the command
-//	System.out.println("Here is the standard output of the command:\n");
-//	String s = null;
-//	while ((s = stdInput.readLine()) != null) {
-//	    containerList.add(s);
-//	    System.out.println(s);
-//	    LOG.info(s);
-//	}
-//
-//	// read any errors from the attempted command
-//	System.out.println("Here is the standard error of the command (if any):\n");
-//	while ((s = stdError.readLine()) != null) {
-//	    System.out.println(s);
-//	    LOG.info(s);
-//	}
+	List<String> containerList = new ArrayList<String>();
+	Runtime rt = Runtime.getRuntime();
+
+	String[] commands = { "docker-machine", "env" };
+	Process proc = rt.exec(commands);
+
+	BufferedReader stdInput = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+
+	BufferedReader stdError = new BufferedReader(new InputStreamReader(proc.getErrorStream()));
+
+	// read the output from the command
+	System.out.println("Here is the standard output of the command:\n");
+	String s = null;
+	while ((s = stdInput.readLine()) != null) {
+	    containerList.add(s);
+	    System.out.println(s);
+	    LOG.info(s);
+	}
+
+	// read any errors from the attempted command
+	System.out.println("Here is the standard error of the command (if any):\n");
+	while ((s = stdError.readLine()) != null) {
+	    System.out.println(s);
+	    LOG.info(s);
+	}
+
+
+	String[] commands1 = { "docker", "info" };
+	Process proc1 = rt.exec(commands1);
+
+	BufferedReader stdInput1 = new BufferedReader(new InputStreamReader(proc1.getInputStream()));
+
+	BufferedReader stdError1 = new BufferedReader(new InputStreamReader(proc1.getErrorStream()));
+
+	// read the output from the command
+	System.out.println("Here is the standard output of the command:\n");
+	String s1 = null;
+	while ((s1 = stdInput1.readLine()) != null) {
+	    //containerList.add(s);
+	    System.out.println(s1);
+	    LOG.info(s1);
+	}
+
+	// read any errors from the attempted command
+	System.out.println("Here is the standard error of the command (if any):\n");
+	while ((s1 = stdError1.readLine()) != null) {
+	    System.out.println(s1);
+	    LOG.info(s1);
+	}
 //
 //	for (String containerId : containerList) {
 //
