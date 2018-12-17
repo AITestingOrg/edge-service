@@ -32,6 +32,9 @@ services:
     depends_on:
       - discoveryservice
       - mysqlserver
+    links:
+      - discoveryservice
+      - mysqlserver
     ports:
       - '8080'
     environment:
@@ -67,6 +70,10 @@ services:
       - discoveryservice
       - rabbitmq
       - mongo
+    links:
+      - discoveryservice
+      - rabbitmq
+      - mongo
     environment:
       - JAVA_OPTS=-Xms64m -Xmx128m -XX:+UseG1GC 
 
@@ -80,6 +87,10 @@ services:
     ports:
       - '8080'
     depends_on:
+      - rabbitmq
+      - mongo
+      - discoveryservice
+    links:
       - rabbitmq
       - mongo
       - discoveryservice
@@ -98,6 +109,9 @@ services:
     depends_on:
       - discoveryservice
       - rabbitmq
+    links:
+      - discoveryservice
+      - rabbitmq
     environment:
       - JAVA_OPTS=-Xms64m -Xmx128m -XX:+UseG1GC 
 
@@ -114,6 +128,10 @@ services:
     ports:
       - '8080'
     depends_on:
+      - discoveryservice
+      - rabbitmq
+      - mongo
+    links:
       - discoveryservice
       - rabbitmq
       - mongo
