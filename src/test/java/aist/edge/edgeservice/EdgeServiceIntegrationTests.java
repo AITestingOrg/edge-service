@@ -90,12 +90,12 @@ public class EdgeServiceIntegrationTests {
         // docker.containers().container("userservice");
         DockerPort userPort = docker.containers().container("userservice").port(8080);
         userServiceURL = String.format("http://%s:%s", userPort.getIp(), userPort.getExternalPort());
-        if (!userPort.isListeningNow()) {
-            LOG.info("User service didn't respond over HTTP");
-            throw new Exception(String.format("User didn't respond, port: %s", userPort.getInternalPort()));
-        }
-        LOG.info("User service responded over HTTP");
-        LOG.info("Url to be used: %s", userServiceURL);
+//        if (!userPort.isListeningNow()) {
+//            LOG.info("User service didn't respond over HTTP");
+//            throw new Exception(String.format("User didn't respond, port: %s", userPort.getInternalPort()));
+//        }
+//        LOG.info("User service responded over HTTP");
+//        LOG.info("Url to be used: %s", userServiceURL);
 
         while (!docker.containers().container("userservice")
                 .portIsListeningOnHttp(8080, (port) -> port.inFormat(userServiceURL)).succeeded()) {
