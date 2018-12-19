@@ -55,7 +55,7 @@ public class EdgeServiceIntegrationTests {
             .waitingForService("rabbitmq", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("userservice", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("userservice",
-                    HealthChecks.toRespondOverHttp(8080, (port) -> port.inFormat("https://$HOST:$EXTERNAL_PORT")))
+                    HealthChecks.toRespondOverHttp(8080, (port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
             .waitingForService("tripmanagementcmd", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("tripmanagementquery", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("gmapsadapter", HealthChecks.toHaveAllPortsOpen())
