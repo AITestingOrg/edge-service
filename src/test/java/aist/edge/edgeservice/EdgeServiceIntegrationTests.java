@@ -67,7 +67,7 @@ public class EdgeServiceIntegrationTests {
 
     Container discoveryContainer = docker.containers().container("discoveryservice");
     DockerPort discoveryPort = discoveryContainer.port(8761);
-    if (!discoveryPort.isListeningNow()) {
+    while (!discoveryPort.isListeningNow()) {
         LOG.info("Discovery service didn't respond over HTTP");
         throw new Exception(String.format("Discovery didn't respond, port: %s", discoveryPort.getInternalPort()));
     }
@@ -84,32 +84,32 @@ public class EdgeServiceIntegrationTests {
     // }
     // LOG.info("Mongo service responded over HTTP");
     //
-    Container userContainer = docker.containers().container("userservice");
-    DockerPort userPort = userContainer.port(8080);
-    userServiceURL = String.format("http://%s:%s", System.getenv("HOST"), userPort.getExternalPort());
-    if (!userPort.isListeningNow()) {
+//    Container userContainer = docker.containers().container("userservice");
+    DockerPort userPort = docker.containers().container("userservice").port(8080);
+    userServiceURL = String.format("http://%s:%s", userPort.inFormat("$HOST"), userPort.getExternalPort());
+    while (!userPort.isListeningNow()) {
         LOG.info("User service didn't respond over HTTP");
         throw new Exception(String.format("User didn't respond, port: %s", userPort.getInternalPort()));
     }
     LOG.info("User service responded over HTTP");
     LOG.info("Url to be used: %s", userServiceURL);
 
-    Container tripManagementCmdContainer = docker.containers().container("tripmanagementcmd");
-    DockerPort tripManagementCmdPort = tripManagementCmdContainer.port(8080);
+//    Container tripManagementCmdContainer = docker.containers().container("tripmanagementcmd");
+    DockerPort tripManagementCmdPort = docker.containers().container("tripmanagementcmd").port(8080);
     tripCommandURL = String.format("http://%s:%s", tripManagementCmdPort.getIp(),
         tripManagementCmdPort.getExternalPort());
-    if (!tripManagementCmdPort.isListeningNow()) {
+    while (!tripManagementCmdPort.isListeningNow()) {
         LOG.info("TripManagementCmd service didn't respond over HTTP");
         throw new Exception(String.format("TripManagementCmd didn't respond, port: %s",
             tripManagementCmdPort.getInternalPort()));
     }
     LOG.info("TripManagementCmd service responded over HTTP");
 
-    Container tripManagementQueryContainer = docker.containers().container("tripmanagementquery");
-    DockerPort tripManagementQueryPort = tripManagementQueryContainer.port(8080);
+//    Container tripManagementQueryContainer = docker.containers().container("tripmanagementquery");
+    DockerPort tripManagementQueryPort = docker.containers().container("tripmanagementquery").port(8080);
     tripQueryURL = String.format("http://%s:%s", tripManagementQueryPort.getIp(),
         tripManagementQueryPort.getExternalPort());
-    if (!tripManagementQueryPort.isListeningNow()) {
+    while (!tripManagementQueryPort.isListeningNow()) {
         LOG.info("TripManagementQuery service didn't respond over HTTP");
         throw new Exception(String.format("TripManagementQuery didn't respond, port: %s",
             tripManagementQueryPort.getInternalPort()));
@@ -129,11 +129,11 @@ public class EdgeServiceIntegrationTests {
     // }
     // LOG.info("Gmaps Adapter service responded over HTTP");
     //
-    Container calculationContainer = docker.containers().container("calculationservice");
-    DockerPort calculationPort = calculationContainer.port(8080);
+//    Container calculationContainer = docker.containers().container("calculationservice");
+    DockerPort calculationPort = docker.containers().container("calculationservice").port(8080);
     calculationServiceURL = String.format("http://%s:%s", calculationPort.getIp(),
         calculationPort.getExternalPort());
-    if (!calculationPort.isListeningNow()) {
+    while (!calculationPort.isListeningNow()) {
         LOG.info("Calculation service didn't respond over HTTP");
         throw new Exception(
             String.format("Calculation didn't respond, port: %s", calculationPort.getInternalPort()));
