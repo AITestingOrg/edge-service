@@ -40,7 +40,6 @@ public class EdgeServiceIntegrationTests {
     // private static String discoveryServiceURL;
     private static String mongoURL;
     private static String userServiceURL;
-    private static String userServiceURL3;
     private static String tripCommandURL;
     private static String tripQueryURL;
     private static String gmapsAdapterURL;
@@ -87,15 +86,13 @@ public class EdgeServiceIntegrationTests {
     //
     Container userContainer = docker.containers().container("userservice");
     DockerPort userPort = userContainer.port(8080);
-    userServiceURL = String.format("http://localhost:%s", userPort.getIp(), userPort.getExternalPort());
+    userServiceURL = String.format("http://%s:%s", System.getenv("DOCKER_IP"), userPort.getExternalPort());
     if (!userPort.isListeningNow()) {
         LOG.info("User service didn't respond over HTTP");
         throw new Exception(String.format("User didn't respond, port: %s", userPort.getInternalPort()));
     }
     LOG.info("User service responded over HTTP");
-    LOG.info(String.format("User Service docker-name: %s - IP: %s - Int Port: %s - Ext Port: %s",
-        userContainer.getContainerName(), userPort.getIp(), userPort.getInternalPort(),
-        userPort.getExternalPort()));
+    LOG.info("Url to be used: %s", userServiceURL);
 
     Container tripManagementCmdContainer = docker.containers().container("tripmanagementcmd");
     DockerPort tripManagementCmdPort = tripManagementCmdContainer.port(8080);
@@ -299,6 +296,7 @@ public class EdgeServiceIntegrationTests {
 
     LOG.info(String.format("User Service - Trying url: %s", userServiceURL));
     response = restTemplate.postForEntity(userServiceURL + "/auth/oauth/token", request, String.class, parameters);
+    LOG.info("Request succeded");
 
     // then:
     assertThat(response.getStatusCodeValue()).isEqualTo(200);
