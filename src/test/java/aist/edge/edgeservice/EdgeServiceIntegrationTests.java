@@ -86,7 +86,7 @@ public class EdgeServiceIntegrationTests {
     //
     Container userContainer = docker.containers().container("userservice");
     DockerPort userPort = userContainer.port(8080);
-    userServiceURL = String.format("http://%s:%s", "localhost", userPort.getExternalPort());
+    userServiceURL = String.format("http://%s:%s", System.getenv("HOST"), userPort.getExternalPort());
     if (!userPort.isListeningNow()) {
         LOG.info("User service didn't respond over HTTP");
         throw new Exception(String.format("User didn't respond, port: %s", userPort.getInternalPort()));
