@@ -69,7 +69,7 @@ public class EdgeServiceIntegrationTests {
 
         Container discoveryContainer = docker.containers().container("discoveryservice");
         DockerPort discoveryPort = discoveryContainer.port(8761);
-        if (!discoveryPort.isListeningNow()) {
+        while (!discoveryPort.isListeningNow()) {
             LOG.info("Discovery service didn't respond over HTTP");
             throw new Exception(String.format("Discovery didn't respond, port: %s", discoveryPort.getInternalPort()));
         }
@@ -108,10 +108,10 @@ public class EdgeServiceIntegrationTests {
         DockerPort tripManagementCmdPort = docker.containers().container("tripmanagementcmd").port(8080);
         tripCommandURL = String.format("http://%s:%s", tripManagementCmdPort.getIp(),
                 tripManagementCmdPort.getExternalPort());
-        if (!tripManagementCmdPort.isListeningNow()) {
+        while (!tripManagementCmdPort.isListeningNow()) {
             LOG.info("TripManagementCmd service didn't respond over HTTP");
-            throw new Exception(String.format("TripManagementCmd didn't respond, port: %s",
-                    tripManagementCmdPort.getInternalPort()));
+//            throw new Exception(String.format("TripManagementCmd didn't respond, port: %s",
+//                    tripManagementCmdPort.getInternalPort()));
         }
         LOG.info("TripManagementCmd service responded over HTTP");
 
@@ -120,10 +120,10 @@ public class EdgeServiceIntegrationTests {
         DockerPort tripManagementQueryPort = docker.containers().container("tripmanagementquery").port(8080);
         tripQueryURL = String.format("http://%s:%s", tripManagementQueryPort.getIp(),
                 tripManagementQueryPort.getExternalPort());
-        if (!tripManagementQueryPort.isListeningNow()) {
+        while (!tripManagementQueryPort.isListeningNow()) {
             LOG.info("TripManagementQuery service didn't respond over HTTP");
-            throw new Exception(String.format("TripManagementQuery didn't respond, port: %s",
-                    tripManagementQueryPort.getInternalPort()));
+//            throw new Exception(String.format("TripManagementQuery didn't respond, port: %s",
+//                    tripManagementQueryPort.getInternalPort()));
         }
         LOG.info("TripManagementQuery service responded over HTTP");
         //
@@ -145,10 +145,10 @@ public class EdgeServiceIntegrationTests {
         DockerPort calculationPort = docker.containers().container("calculationservice").port(8080);
         calculationServiceURL = String.format("http://%s:%s", calculationPort.getIp(),
                 calculationPort.getExternalPort());
-        if (!calculationPort.isListeningNow()) {
+        while (!calculationPort.isListeningNow()) {
             LOG.info("Calculation service didn't respond over HTTP");
-            throw new Exception(
-                    String.format("Calculation didn't respond, port: %s", calculationPort.getInternalPort()));
+//            throw new Exception(
+//                    String.format("Calculation didn't respond, port: %s", calculationPort.getInternalPort()));
         }
         LOG.info("Calculation service responded over HTTP");
         //
