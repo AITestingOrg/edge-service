@@ -45,187 +45,63 @@ public class EdgeServiceIntegrationTests {
     private static String gmapsAdapterURL;
     private static String calculationServiceURL;
 
-    // Wait for all services to have ports open
+  //Wait for all services to have ports open
     @ClassRule
     public static DockerComposeRule docker = DockerComposeRule.builder().pullOnStartup(true)
             .file("src/test/resources/docker-compose.yml")
-            .waitingForService("discoveryservice", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("mysqlserver", HealthChecks.toHaveAllPortsOpen())
+            .waitingForService("userservice", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("mongo", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("rabbitmq", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("userservice", HealthChecks.toHaveAllPortsOpen())
-            //.waitingForService("userservice",
-                   // HealthChecks.toRespondOverHttp(8080, (port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
             .waitingForService("tripmanagementcmd", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("tripmanagementquery", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("gmapsadapter", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("calculationservice", HealthChecks.toHaveAllPortsOpen()).build();
+            .waitingForService("calculationservice", HealthChecks.toHaveAllPortsOpen())
+            .waitingForService("discoveryservice", HealthChecks.toHaveAllPortsOpen())
+            .waitingForService("discoveryservice", HealthChecks.toRespondOverHttp(8761,
+                (port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
+            .build();
 
-    // Get IP addresses and ports to run tests on
+    //Get IP addresses and ports to run tests on
     @BeforeClass
-    public static void initialize() throws Exception {
-
+    public static void initialize() {
         LOG.info("Initializing ports from Docker");
+        DockerPort tripManagementCommand = docker.containers().container("tripmanagementcmd")
+                .port(8080);
+        tripCommandURL = String.format("http://%s:%s", tripManagementCommand.getIp(),
+                tripManagementCommand.getExternalPort());
+        LOG.info("Trip Command url found: " + tripCommandURL);
 
-        Container discoveryContainer = docker.containers().container("discoveryservice");
-        DockerPort discoveryPort = discoveryContainer.port(8761);
-        while (!discoveryPort.isListeningNow()) {
-            LOG.info("Discovery service didn't respond over HTTP");
-            throw new Exception(String.format("Discovery didn't respond, port: %s", discoveryPort.getInternalPort()));
-        }
-        LOG.info("Discovery service responded over HTTP");
+        DockerPort tripManagementQuery = docker.containers().container("tripmanagementquery")
+                .port(8080);
+        tripQueryURL = String.format("http://%s:%s", tripManagementQuery.getIp(),
+                tripManagementQuery.getExternalPort());
+        LOG.info("Trip Query url found: " + tripQueryURL);
 
-        // Container mongoContainer = docker.containers().container("mongo");
-        // DockerPort mongoPort = mongoContainer.port(27017);
-        // mongoURL = String.format("http://%s:%s", mongoPort.getIp(),
-        // mongoPort.getExternalPort());
-        // if(!mongoPort.isListeningNow()){
-        // LOG.info("Mongo service didn't respond over HTTP");
-        // throw new Exception(String.format("Mongo didn't respond, port: %s",
-        // mongoPort.getInternalPort()));
-        // }
-        // LOG.info("Mongo service responded over HTTP");
-        //
-        // Container userContainer =
-        // docker.containers().container("userservice");
-        DockerPort userPort = docker.containers().container("userservice").port(8080);
-        userServiceURL = String.format("http://%s:%s", userPort.getIp(), userPort.getExternalPort());
-//        if (!userPort.isListeningNow()) {
-//            LOG.info("User service didn't respond over HTTP");
-//            throw new Exception(String.format("User didn't respond, port: %s", userPort.getInternalPort()));
-//        }
-//        LOG.info("User service responded over HTTP");
-//        LOG.info("Url to be used: %s", userServiceURL);
-
-        while (!docker.containers().container("userservice")
-                .portIsListeningOnHttp(8080, (port) -> port.inFormat(userServiceURL)).succeeded()) {
-            LOG.info("Waiting for user service to respond over HTTP");
-        }
-        LOG.info("user service url found: " + userServiceURL);
-
-        // Container tripManagementCmdContainer =
-        // docker.containers().container("tripmanagementcmd");
-        DockerPort tripManagementCmdPort = docker.containers().container("tripmanagementcmd").port(8080);
-        tripCommandURL = String.format("http://%s:%s", tripManagementCmdPort.getIp(),
-                tripManagementCmdPort.getExternalPort());
-        while (!tripManagementCmdPort.isListeningNow()) {
-            LOG.info("TripManagementCmd service didn't respond over HTTP");
-//            throw new Exception(String.format("TripManagementCmd didn't respond, port: %s",
-//                    tripManagementCmdPort.getInternalPort()));
-        }
-        LOG.info("TripManagementCmd service responded over HTTP");
-
-        // Container tripManagementQueryContainer =
-        // docker.containers().container("tripmanagementquery");
-        DockerPort tripManagementQueryPort = docker.containers().container("tripmanagementquery").port(8080);
-        tripQueryURL = String.format("http://%s:%s", tripManagementQueryPort.getIp(),
-                tripManagementQueryPort.getExternalPort());
-        while (!tripManagementQueryPort.isListeningNow()) {
-            LOG.info("TripManagementQuery service didn't respond over HTTP");
-//            throw new Exception(String.format("TripManagementQuery didn't respond, port: %s",
-//                    tripManagementQueryPort.getInternalPort()));
-        }
-        LOG.info("TripManagementQuery service responded over HTTP");
-        //
-        // Container gmapsAdapterContainer =
-        // docker.containers().container("gmapsadapter");
-        // DockerPort gmapsAdapterPort = gmapsAdapterContainer.port(8080);
-        // gmapsAdapterURL = String.format("http://%s:%s",
-        // gmapsAdapterPort.getIp(),
-        // gmapsAdapterPort.getExternalPort());
-        // if(!gmapsAdapterPort.isListeningNow()){
-        // LOG.info("Gmaps Adapter service didn't respond over HTTP");
-        // throw new Exception(String.format("Gmaps Adapter didn't respond,
-        // port: %s", gmapsAdapterPort.getInternalPort()));
-        // }
-        // LOG.info("Gmaps Adapter service responded over HTTP");
-        //
-        // Container calculationContainer =
-        // docker.containers().container("calculationservice");
-        DockerPort calculationPort = docker.containers().container("calculationservice").port(8080);
-        calculationServiceURL = String.format("http://%s:%s", calculationPort.getIp(),
-                calculationPort.getExternalPort());
-        while (!calculationPort.isListeningNow()) {
-            LOG.info("Calculation service didn't respond over HTTP");
-//            throw new Exception(
-//                    String.format("Calculation didn't respond, port: %s", calculationPort.getInternalPort()));
-        }
-        LOG.info("Calculation service responded over HTTP");
-        //
-        // DockerPort discoveryService =
-        // docker.containers().container("discoveryservice").port(8761);
-        // discoveryServiceURL = String.format("http://%s:%s",
-        // discoveryService.getIp(),
-        // discoveryService.getExternalPort());
-        // while (!docker.containers().container("discoveryservice")
-        // .portIsListeningOnHttp(8761, (port) ->
-        // port.inFormat(discoveryServiceURL)).succeeded()) {
-        // LOG.info("Waiting for discovery service to respond over HTTP");
-        // }
-        // LOG.info("Discovery Service url found: " + discoveryServiceURL);
-
-        DockerPort mongo = docker.containers().container("mongo").port(27017);
-        mongoURL = String.format("http://%s:%s", mongo.getIp(), mongo.getExternalPort());
-        while (!docker.containers().container("mongo").portIsListeningOnHttp(27017, (port) -> port.inFormat(mongoURL))
-                .succeeded()) {
-            LOG.info("Waiting for mongo to respond over HTTP");
-        }
-        LOG.info("Mongo url found: " + mongoURL);
-
-        // DockerPort userService =
-        // docker.containers().container("userservice").port(8080);
-        // userServiceURL = String.format("http://%s:%s", userService.getIp(),
-        // userService.getExternalPort());
-        // while (!docker.containers().container("userservice")
-        // .portIsListeningOnHttp(8080, (port) ->
-        // port.inFormat(userServiceURL)).succeeded()) {
-        // LOG.info("Waiting for user service to respond over HTTP");
-        // }
-        // LOG.info("User Service url found: " + userServiceURL);
-
-        // DockerPort tripManagementCommand =
-        // docker.containers().container("tripmanagementcmd").port(8080);
-        // tripCommandURL = String.format("http://%s:%s",
-        // tripManagementCommand.getIp(),
-        // tripManagementCommand.getExternalPort());
-        // while (!docker.containers().container("tripmanagementcmd")
-        // .portIsListeningOnHttp(8080, (port) ->
-        // port.inFormat(tripCommandURL)).succeeded()) {
-        // LOG.info("Waiting for Trip Command to respond over HTTP");
-        // }
-        // LOG.info("Trip Command url found: " + tripCommandURL);
-        //
-        // DockerPort tripManagementQuery =
-        // docker.containers().container("tripmanagementquery").port(8080);
-        // tripQueryURL = String.format("http://%s:%s",
-        // tripManagementQuery.getIp(),
-        // tripManagementQuery.getExternalPort());
-        // while (!docker.containers().container("tripmanagementquery")
-        // .portIsListeningOnHttp(8080, (port) ->
-        // port.inFormat(tripQueryURL)).succeeded()) {
-        // LOG.info("Waiting for Trip Query to respond over HTTP");
-        // }
-        // LOG.info("Trip Query url found: " + tripQueryURL);
-
-        DockerPort gmapsAdapter = docker.containers().container("gmapsadapter").port(8080);
-        gmapsAdapterURL = String.format("http://%s:%s", gmapsAdapter.getIp(), gmapsAdapter.getExternalPort());
-        while (!docker.containers().container("gmapsadapter")
-                .portIsListeningOnHttp(8080, (port) -> port.inFormat(gmapsAdapterURL)).succeeded()) {
-            LOG.info("Waiting for user service to respond over HTTP");
-        }
+        DockerPort gmapsAdapter = docker.containers().container("gmapsadapter")
+                .port(8080);
+        gmapsAdapterURL = String.format("http://%s:%s", gmapsAdapter.getIp(),
+                gmapsAdapter.getExternalPort());
         LOG.info("Gmaps Adapter url found: " + gmapsAdapterURL);
 
-        // DockerPort calculationService =
-        // docker.containers().container("calculationservice").port(8080);
-        // calculationServiceURL = String.format("http://%s:%s",
-        // calculationService.getIp(),
-        // calculationService.getExternalPort());
-        // while (!docker.containers().container("calculationservice")
-        // .portIsListeningOnHttp(8080, (port) ->
-        // port.inFormat(calculationServiceURL)).succeeded()) {
-        // LOG.info("Waiting for calculation service to respond over HTTP");
-        // }
-        // LOG.info("Calculation Service url found: " + calculationServiceURL);
+        DockerPort calculationService = docker.containers().container("calculationservice")
+                .port(8080);
+        calculationServiceURL = String.format("http://%s:%s", calculationService.getIp(),
+                calculationService.getExternalPort());
+        while (!docker.containers().container("calculationservice").portIsListeningOnHttp(8080,
+            (port) -> port.inFormat(calculationServiceURL)).succeeded()) {
+            LOG.info("Waiting for calculation service to respond over HTTP");
+        }
+        LOG.info("Calculation Service url found: " + calculationServiceURL);
+
+        DockerPort userService = docker.containers().container("userservice")
+                .port(8080);
+        userServiceURL = String.format("http://%s:%s", userService.getIp(),
+                userService.getExternalPort());
+        while (!docker.containers().container("userservice").portIsListeningOnHttp(8080,
+            (port) -> port.inFormat(userServiceURL)).succeeded()) {
+            LOG.info("Waiting for user service to respond over HTTP");
+        }
+        LOG.info("User Service url found: " + userServiceURL);
     }
 
     private TestRestTemplate restTemplate = new TestRestTemplate();
