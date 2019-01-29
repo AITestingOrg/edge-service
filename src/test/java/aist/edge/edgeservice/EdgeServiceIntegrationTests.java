@@ -57,8 +57,8 @@ public class EdgeServiceIntegrationTests {
             .waitingForService("gmapsadapter", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("calculationservice", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("discoveryservice", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("discoveryservice", HealthChecks.toRespondOverHttp(8761,
-                (port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
+//            .waitingForService("discoveryservice", HealthChecks.toRespondOverHttp(8761,
+//                (port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
             .build();
 
     //Get IP addresses and ports to run tests on
