@@ -4,22 +4,31 @@ spring:
   application:
     name: edgeservice
 zuul:
+  host:
+    connect-timeout-millis: 20000
+    socket-timeout-millis: 240000
   prefix: /api
   routes:
     trip-cmd:
       path: /trip/cmd/**
-      url: http://${TRIP_CMD_HOST:tripmanagementcmd}:8080/api
+      url: http://${TRIP_CMD_HOST:tripmanagementcmd}:${TRIP_CMD_PORT:8080}/api
     trip-query:
       path: /trip/query/**
-      url: http://${TRIP_QUERY_HOST:tripmanagementquery}:8080/api
+      url: http://${TRIP_QUERY_HOST:tripmanagementquery}:${TRIP_QUERY_PORT:8080}/api
     userservice:
-      path: /${USER_SERVICE_HOST:userservice}/**
-      url: http://${USER_SERVICE_HOST:userservice}:8080/
+      path: /userservice/**
+      url: http://${USER_SERVICE_HOST:userservice}:${USER_SERVICE_PORT:8080}/
       sensitiveHeaders: Cookie,Set-Cookie
+    calculation:
+      path: /calculationservice/**
+      url: http://${CALCULATION_HOST:calculationservice}:${CALCULATION_PORT:8080}/
+    gmapsadapter:
+      path: /gmapsadapter/**
+      url: http://${GMAPS_ADAPTER_HOST:gmapsadapter}:${GMAPS_ADAPTER_PORT:8080}/
 security:
   oauth2:
     resource:
-      userInfoUri: http://${USER_SERVICE_HOST:userservice}:8080/auth/user
+      userInfoUri: http://${USER_SERVICE_HOST:userservice}:${USER_SERVICE_PORT:8080}/auth/user
   ignored: /catalog/**
 eureka:
   instance:
@@ -28,11 +37,15 @@ eureka:
     registerWithEureka: true
     fetchRegistry: true
     serviceUrl:
-      defaultZone: http://${EUREKA_SERVER:discoveryservice}:8761/eureka/
+      defaultZone: http://${EUREKA_SERVER:discoveryservice}:${EUREKA_PORT:8761}/eureka/
 management:
   security:
     enabled: false
   context-path: /actuator
+hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 60000
+ribbon:
+  ConnectTimeout: 60000
+ReadTimeout: 60000
   
 ---
 spring:
@@ -65,10 +78,6 @@ eureka:
     fetchRegistry: true
     serviceUrl:
       defaultZone: http://discoveryservice:8761/eureka/
-hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 60000
-ribbon:
-  ConnectTimeout: 3000
-ReadTimeout: 60000
 
 ---
 spring:
