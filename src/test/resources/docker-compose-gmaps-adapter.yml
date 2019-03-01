@@ -1,0 +1,33 @@
+version: '2.3'
+
+services:
+
+  discoveryservice:
+    image: aista/eureka
+    container_name: 'discoveryservice'
+    mem_limit: 512M
+    ports:
+      - "8761:8761"
+      
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: 'rabbitmq'
+    mem_limit: 512M
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  gmapsadapter:
+    image: aista/gmaps-adapter
+    container_name: 'gmapsadapter'
+    mem_limit: 512M
+    environment:
+      - EUREKA_SERVER=discoveryservice
+      - RABBIT_HOST=rabbitmq
+    ports:
+      - '8080'
+    depends_on:
+      - discoveryservice
+      - rabbitmq
+    environment:
+      - JAVA_OPTS=-Xms64m -Xmx128m -XX:+UseG1GC

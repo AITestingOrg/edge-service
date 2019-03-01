@@ -1,16 +1,31 @@
-version: '3'
+version: '2.3'
 
 services:
 
   edgeservice:
     image: aista/edge-service
+    mem_limit: 512M
     ports:
       - "8080:8080"
     depends_on:
       - discoveryservice
 
+  notificationservice:
+    depends_on:
+      - discoveryservice
+      - rabbitmq
+    image: aista/notification-service
+    mem_limit: 512M
+    command: notification-service
+    ports:
+      - "32700:32700"
+    environment:
+      - RABBIT_HOST=rabbitmq
+      - EUREKA_SERVER=discoveryservice
+
   discoveryservice:
     image: aista/eureka
+    mem_limit: 512M
     ports:
       - "8761:8761"
 
@@ -32,6 +47,7 @@ services:
 
   mysqlserver:
     image: mysql:5.7
+    mem_limit: 512M
     volumes:
       - mysql-data:/var/lib/mysql:rw
     restart: always
@@ -46,6 +62,7 @@ services:
 
   userservice:
     image: aista/user-service
+    mem_limit: 512M
     depends_on:
       - discoveryservice
       - mysqlserver
@@ -54,27 +71,30 @@ services:
 
   mongo:
     image: 'mongo:3.4.1'
+    mem_limit: 512M
     container_name: 'mongo'
     ports:
       - '27017:27017'
     volumes:
       - 'mongo:/data/db'
 
-  postgres:
-    image: postgres
-    restart: always
-    environment:
-      POSTGRES_DB: 'passenger_db'
-      POSTGRES_PASSWORD: "admin"
-      POSTGRES_USER: "admin"
-      PGDATA: ./postgres-data
-    ports:
-      - '5432:5432'
-    volumes:
-      - ./db_volume:/var/lib/postgresql
+#  postgres:
+#    image: postgres
+#    mem_limit: 512M
+#    restart: always
+#    environment:
+#      POSTGRES_DB: 'passenger_db'
+#      POSTGRES_PASSWORD: "admin"
+#      POSTGRES_USER: "admin"
+#      PGDATA: ./postgres-data
+#    ports:
+#      - '5432:5432'
+#    volumes:
+#      - ./db_volume:/var/lib/postgresql
 
   rabbitmq:
     image: rabbitmq:management
+    mem_limit: 512M
     container_name: 'rabbitmq'
     ports:
       - "5672:5672"
@@ -82,6 +102,7 @@ services:
 
   tripmanagementcmd:
     image: aista/trip-management-cmd
+    mem_limit: 512M
     environment:
       - RABBIT_HOST=rabbitmq
       - MONGO_HOST=mongo
@@ -94,6 +115,7 @@ services:
 
   tripmanagementquery:
     image: aista/trip-management-query
+    mem_limit: 512M
     environment:
       - RABBIT_HOST=rabbitmq
       - MONGO_HOST=mongo
@@ -106,6 +128,7 @@ services:
 
   gmaps-adapter:
     image: aista/gmaps-adapter
+    mem_limit: 512M
     environment:
       - EUREKA_SERVER=discoveryservice
       - RABBIT_HOST=rabbitmq
@@ -116,46 +139,52 @@ services:
 
   calculation-service:
     image: aista/calculation-service
+    mem_limit: 512M
     environment:
-      - EUREKA_SERVER=discoveryservice
       - RABBIT_HOST=rabbitmq
+      - EUREKA_SERVER=discoveryservice
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
     command: ["go", "run", "main.go"]
     ports:
       - '8080'
     depends_on:
       - discoveryservice
 
-  passenger:
-    image: aista/passenger
-    ports:
-      - '8080'
-    depends_on:
-      - postgres
-      - discoveryservice
-
-  driver-cmd:
-    image: aista/driver-cmd
-    environment:
-      - EUREKA_SERVER=discoveryservice
-    ports:
-      - '8080'
-    depends_on:
-      - rabbitmq
-      - mongo
-      - discoveryservice
-
-  driver-query:
-    image: aista/driver-query
-    container_name: 'driver-query'
-    environment:
-      - RABBIT_HOST=rabbitmq
-      - MONGO_HOST=mongo
-    ports:
-      - "8080"
-    depends_on:
-      - rabbitmq
-      - mongo
-      - discoveryservice
+#  passenger:
+#    image: aista/passenger
+#    mem_limit: 512M
+#    ports:
+#      - '8080'
+#    depends_on:
+#      - postgres
+#      - discoveryservice
+#
+#  driver-cmd:
+#    image: aista/driver-cmd
+#    mem_limit: 512M
+#    environment:
+#      - EUREKA_SERVER=discoveryservice
+#    ports:
+#      - '8080'
+#    depends_on:
+#      - rabbitmq
+#      - mongo
+#      - discoveryservice
+#
+#  driver-query:
+#    image: aista/driver-query
+#    mem_limit: 512M
+#    container_name: 'driver-query'
+#    environment:
+#      - RABBIT_HOST=rabbitmq
+#      - MONGO_HOST=mongo
+#    ports:
+#      - "8080"
+#    depends_on:
+#      - rabbitmq
+#      - mongo
+#      - discoveryservice
 
 volumes:
   mongo:

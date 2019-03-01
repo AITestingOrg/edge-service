@@ -1,0 +1,75 @@
+version: '2.3'
+
+services:
+
+  discoveryservice:
+    image: aista/eureka
+    container_name: discoveryservice
+    mem_limit: 512M
+    ports:
+      - "8761:8761"
+
+  mysqlserver:
+    image: mysql:5.7
+    container_name: mysqlserver
+    mem_limit: 512M
+    volumes:
+      - mysql-data:/var/lib/mysql:rw
+    restart: always
+    ports:
+      - '3306:3306'
+    environment:
+      MYSQL_USER:
+      MYSQL_PASSWORD:
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+      MYSQL_DATABASE: 'user_service'
+
+  userservice:
+    image: aista/user-service
+    container_name: userservice
+    mem_limit: 512M
+    depends_on:
+      - discoveryservice
+      - mysqlserver
+    ports:
+      - '8080'
+    environment:
+      - JAVA_OPTS=-Xms64m -Xmx128m -XX:+UseG1GC 
+
+  mongo:
+    image: 'mongo:3.4.1'
+    container_name: 'mongo'
+    mem_limit: 512M
+    ports:
+      - '27017:27017'
+    volumes:
+      - 'mongo:/data/db'
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: 'rabbitmq'
+    mem_limit: 512M
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  tripmanagementquery:
+    image: aista/trip-management-query
+    container_name: tripmanagementquery
+    mem_limit: 512M
+    environment:
+      - RABBIT_HOST=rabbitmq
+      - MONGO_HOST=mongo
+    ports:
+      - '8080'
+    depends_on:
+      - rabbitmq
+      - mongo
+      - discoveryservice
+    environment:
+      - JAVA_OPTS=-Xms64m -Xmx128m -XX:+UseG1GC
+
+volumes:
+  mongo:
+  mysql-data:

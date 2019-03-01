@@ -56,7 +56,7 @@ dependencies {
     testCompile('com.jayway.restassured:rest-assured:2.5.0')
     testCompile ('com.jayway.restassured:spring-mock-mvc:2.5.0')
     testCompile ('org.springframework.cloud:spring-cloud-starter-contract-stub-runner')
-    testCompile ('com.palantir.docker.compose:docker-compose-rule-junit4:0.33.0')
+    testCompile ('com.palantir.docker.compose:docker-compose-rule-junit4:0.35.0')
 }
 
 dependencyManagement {

@@ -1,0 +1,62 @@
+version: '2.3'
+
+services:
+
+  discoveryservice:
+    image: aista/eureka
+    container_name: 'discoveryservice'
+    mem_limit: 512M
+    ports:
+      - "8761:8761"
+
+  mongo:
+    image: 'mongo:3.4.1'
+    container_name: 'mongo'
+    mem_limit: 512M
+    ports:
+      - '27017:27017'
+    volumes:
+      - 'mongo:/data/db'
+
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: 'rabbitmq'
+    mem_limit: 512M
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  gmapsadapter:
+    image: aista/gmaps-adapter
+    container_name: 'gmapsadapter'
+    mem_limit: 512M
+    environment:
+      - EUREKA_SERVER=discoveryservice
+      - RABBIT_HOST=rabbitmq
+    ports:
+      - '8080'
+    depends_on:
+      - discoveryservice
+      - rabbitmq
+    environment:
+      - JAVA_OPTS=-Xms64m -Xmx128m -XX:+UseG1GC 
+
+  calculationservice:
+    image: aista/calculation-service
+    container_name: 'calculationservice'
+    mem_limit: 512M
+    environment:
+      - RABBIT_HOST=rabbitmq
+      - EUREKA_SERVER=discoveryservice
+      - MONGO_HOST=mongo
+      - MONGO_PORT=27017
+    command: ["go", "run", "main.go"]
+    ports:
+      - '8080'
+    depends_on:
+      - discoveryservice
+      - rabbitmq
+      - mongo
+
+volumes:
+  mongo:

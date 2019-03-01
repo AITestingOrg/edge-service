@@ -25,3 +25,7 @@ dist/
 nbdist/
 .nb-gradle/
 \.DS_Store
+
+### Eclipse ###
+bin/
+logs/

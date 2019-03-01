@@ -1,28 +1,34 @@
-spring:
-  profiles:
-    active: development
 ---
 spring:
   profiles: development
   application:
     name: edgeservice
 zuul:
+  host:
+    connect-timeout-millis: 20000
+    socket-timeout-millis: 240000
   prefix: /api
   routes:
     trip-cmd:
       path: /trip/cmd/**
-      url: http://tripmanagementcmd:8080/api
+      url: http://${TRIP_CMD_HOST:tripmanagementcmd}:${TRIP_CMD_PORT:8080}/api
     trip-query:
       path: /trip/query/**
-      url: http://tripmanagementquery:8080/api
+      url: http://${TRIP_QUERY_HOST:tripmanagementquery}:${TRIP_QUERY_PORT:8080}/api
     userservice:
       path: /userservice/**
-      url: http://userservice:8080/
+      url: http://${USER_SERVICE_HOST:userservice}:${USER_SERVICE_PORT:8080}/
       sensitiveHeaders: Cookie,Set-Cookie
+    calculation:
+      path: /calculationservice/**
+      url: http://${CALCULATION_HOST:calculationservice}:${CALCULATION_PORT:8080}/
+    gmapsadapter:
+      path: /gmapsadapter/**
+      url: http://${GMAPS_ADAPTER_HOST:gmapsadapter}:${GMAPS_ADAPTER_PORT:8080}/
 security:
   oauth2:
     resource:
-      userInfoUri: http://userservice:8080/auth/user
+      userInfoUri: http://${USER_SERVICE_HOST:userservice}:${USER_SERVICE_PORT:8080}/auth/user
   ignored: /catalog/**
 eureka:
   instance:
@@ -31,11 +37,16 @@ eureka:
     registerWithEureka: true
     fetchRegistry: true
     serviceUrl:
-      defaultZone: http://discoveryservice:8761/eureka/
+      defaultZone: http://${EUREKA_SERVER:discoveryservice}:${EUREKA_PORT:8761}/eureka/
 management:
   security:
     enabled: false
   context-path: /actuator
+hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 60000
+ribbon:
+  ConnectTimeout: 60000
+ReadTimeout: 60000
+  
 ---
 spring:
   profiles: docker
@@ -67,6 +78,38 @@ eureka:
     fetchRegistry: true
     serviceUrl:
       defaultZone: http://discoveryservice:8761/eureka/
+
+---
+spring:
+  profiles: local
+  application:
+    name: edgeservice
+zuul:
+  prefix: /api
+  routes:
+    trip-cmd:
+      path: /trip/cmd/**
+      url: http://${DOCKER_MACHINE_IP:localhost}:8080/api
+    trip-query:
+      path: /trip/query/**
+      url: http://${DOCKER_MACHINE_IP:localhost}:8080/api
+    userservice:
+      path: /userservice/**
+      url: http://${DOCKER_MACHINE_IP:localhost}:8080/
+      sensitiveHeaders: Cookie,Set-Cookie
+security:
+  oauth2:
+    resource:
+      userInfoUri: http://${DOCKER_MACHINE_IP:localhost}:8080/auth/user
+  ignored: /catalog/**
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://${DOCKER_MACHINE_IP:localhost}:8761/eureka/
 hystrix.command.default.execution.isolation.thread.timeoutInMilliseconds: 60000
 ribbon:
   ConnectTimeout: 3000
