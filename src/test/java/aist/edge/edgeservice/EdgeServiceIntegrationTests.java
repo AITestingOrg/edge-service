@@ -10,6 +10,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Base64;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.FileHandler;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -41,6 +43,7 @@ public class EdgeServiceIntegrationTests {
     private static String tripQueryURL;
     private static String gmapsAdapterURL;
     private static String calculationServiceURL;
+    private static int MAX_HEALTH_CHECK_TRIES = 100000; // value based on local environment time
 
     // Wait for all services to have ports open
     @ClassRule
@@ -54,13 +57,14 @@ public class EdgeServiceIntegrationTests {
             .waitingForService("gmapsadapter", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("calculationservice", HealthChecks.toHaveAllPortsOpen())
             .waitingForService("discoveryservice", HealthChecks.toHaveAllPortsOpen())
-            .waitingForService("discoveryservice",
-                HealthChecks.toRespondOverHttp(8761, (port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
+//            .waitingForService("discoveryservice",
+//                    HealthChecks.toRespondOverHttp(8761, (port) -> port.inFormat("http://$HOST:$EXTERNAL_PORT")))
             .build();
 
     // Get IP addresses and ports to run tests on
     @BeforeClass
-    public static void initialize() {
+    public static void initialize() throws InterruptedException {
+        TimeUnit.SECONDS.sleep(20);
         LOG.info("Initializing ports from Docker");
         DockerPort tripManagementCommand = docker.containers().container("tripmanagementcmd").port(8080);
         tripCommandURL = String.format("http://%s:%s", tripManagementCommand.getIp(),
@@ -79,19 +83,41 @@ public class EdgeServiceIntegrationTests {
         DockerPort calculationService = docker.containers().container("calculationservice").port(8080);
         calculationServiceURL = String.format("http://%s:%s", calculationService.getIp(),
                 calculationService.getExternalPort());
+        int tryCount = 0;
         while (!docker.containers().container("calculationservice")
                 .portIsListeningOnHttp(8080, (port) -> port.inFormat(calculationServiceURL)).succeeded()) {
+            tryCount++;
             LOG.info("Waiting for calculation service to respond over HTTP");
+            if (tryCount == MAX_HEALTH_CHECK_TRIES) {
+                LOG.error("Error. Max tries (" + tryCount
+                        + ") for health checks on calculationservice reached.\n  Calculation Service needs to register "
+                        + "with Eureka before serving on designated port.");
+                System.exit(100);
+            }
         }
         LOG.info("Calculation Service url found: " + calculationServiceURL);
+        LOG.warn("Calculation Service tryCount: " + tryCount);
+        System.out.println("********************************************");
+        System.out.println("Calculation Service tryCount: " + tryCount);
+        System.out.println("********************************************");
 
         DockerPort userService = docker.containers().container("userservice").port(8080);
         userServiceURL = String.format("http://%s:%s", userService.getIp(), userService.getExternalPort());
+        tryCount = 0;
         while (!docker.containers().container("userservice")
                 .portIsListeningOnHttp(8080, (port) -> port.inFormat(userServiceURL)).succeeded()) {
+            tryCount++;
             LOG.info("Waiting for user service to respond over HTTP");
+            if (tryCount == MAX_HEALTH_CHECK_TRIES) {
+                LOG.error("Error. Max tries (" + tryCount + ") for health checks on userservice reached.");
+                System.exit(100);
+            }
         }
         LOG.info("User Service url found: " + userServiceURL);
+        LOG.warn("User Service tryCount: " + tryCount);
+        System.out.println("********************************************");
+        System.out.println("User Service tryCount: " + tryCount);
+        System.out.println("********************************************");
     }
 
     private TestRestTemplate restTemplate = new TestRestTemplate();

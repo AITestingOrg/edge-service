@@ -28,3 +28,4 @@ nbdist/
 
 ### Eclipse ###
 bin/
+logs/
